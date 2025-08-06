@@ -1,0 +1,21 @@
+{
+    "name": "lunchmoney-nodejs-tools",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc --watch",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.13.1",
+    "devDependencies": {
+        "typescript": "^5.9.2"
+    },
+    "dependencies": {
+        "@commander-js/extra-typings": "^14.0.0"
+    }
+}
