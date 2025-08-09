@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.doRequest = void 0;
-const doRequest = async (method, baseUrl, headersInput = {}, endpoint, args = {}) => {
+export const doRequest = async (method, baseUrl, headersInput = {}, endpoint, args = {}) => {
     const url = new URL(`${baseUrl}/${endpoint}`);
     const headers = {
         ...headersInput,
@@ -23,4 +20,3 @@ const doRequest = async (method, baseUrl, headersInput = {}, endpoint, args = {}
     });
     return res;
 };
-exports.doRequest = doRequest;

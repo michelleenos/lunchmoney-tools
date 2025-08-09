@@ -1,4 +1,4 @@
-import { LMTag } from '../tags'
+import { LMTag } from '../tags.ts'
 
 export interface LMTransaction {
     /**

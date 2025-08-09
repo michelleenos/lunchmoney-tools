@@ -1,5 +1,5 @@
-import { LMInsertTransactionObject } from './insert'
-import { LMTransactionSplit } from './transactions'
+import { LMInsertTransactionObject } from './insert.ts'
+import { LMTransactionSplit } from './base.ts'
 
 export type LMUpdateTransactionObject = Partial<LMInsertTransactionObject> & {
     split?: LMTransactionSplit[]

@@ -5,9 +5,12 @@
         "strict": true,
         "skipLibCheck": true,
         "noImplicitAny": true,
-        "moduleResolution": "NodeNext",
-        "module": "NodeNext",
+        "module": "node18",
+        "moduleResolution": "nodenext",
         "esModuleInterop": true,
+        "rewriteRelativeImportExtensions": true,
+
+        "declaration": true,
         "outDir": "./dist"
     }
 }

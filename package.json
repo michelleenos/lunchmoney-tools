@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "build": "tsc",
         "watch": "tsc --watch",
@@ -13,9 +14,19 @@
     "license": "ISC",
     "packageManager": "pnpm@10.13.1",
     "devDependencies": {
+        "ts-node": "^10.9.2",
+        "tsx": "^4.20.3",
         "typescript": "^5.9.2"
     },
+    "bin": {
+        "lm-tools": "./dist/cli/index.js"
+    },
     "dependencies": {
-        "@commander-js/extra-typings": "^14.0.0"
+        "@commander-js/extra-typings": "^14.0.0",
+        "console-table-printer": "^2.14.6",
+        "winston": "^3.17.0"
+    },
+    "exports": {
+        ".": "./dist/index.js"
     }
 }

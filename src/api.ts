@@ -1,33 +1,45 @@
-import { doRequest } from './utils/request'
-import { getEnvVarString } from './utils/env-vars'
-import { LunchMoneyErrorResponse } from './types/errors'
-import { LMAsset, LMPlaidAccount } from './types/assets-and-accounts'
-import { LMCategory } from './types/categories'
-import { LMUser } from './types/user'
-import { LMTransaction } from './types/transactions/transactions'
+import { doRequest } from './utils/request.ts'
+import { getEnvVarString } from './utils/env-vars.ts'
+import { LunchMoneyErrorResponse } from './types/errors.ts'
+import { LMAsset, LMPlaidAccount } from './types/assets-and-accounts.ts'
+import { LMCategory } from './types/categories.ts'
+import { LMUser } from './types/user.ts'
+import { LMTransaction } from './types/transactions/base.ts'
 import {
     LMInsertTransactionObject,
     LMInsertTransactionsBody,
     LMInsertTransactionsResponse,
-} from './types/transactions/insert'
+} from './types/transactions/insert.ts'
 import {
     LMUpdateTransactionBody,
     LMUpdateTransactionObject,
     LMUpdateTransactionResponse,
-} from './types/transactions/update'
+} from './types/transactions/update.ts'
 import {
     LMTransactionGroupCreate,
     LMTransactionGroupCreateResponse,
-} from './types/transactions/groups'
-import { LMTransactionsQuery } from './types/transactions/query'
+} from './types/transactions/groups.ts'
+import { LMTransactionsQuery } from './types/transactions/query.ts'
+import { LMError } from './utils/errors.ts'
+import { getLogger } from './cli/cli-utils/logger.ts'
 
 export const LM_URL = `https://api.lunchmoney.app/v1`
 
+const logger = getLogger()
 export class LunchMoneyApi {
     apiKey: string
 
     constructor(test = false) {
-        this.apiKey = getEnvVarString(test ? 'LM_TEST_KEY' : 'LM_API_KEY')
+        try {
+            this.apiKey = getEnvVarString(test ? 'LM_TEST_KEY' : 'LM_API_KEY')
+        } catch (e) {
+            throw new LMError(
+                `Missing Lunch Money API key. Please set the LM_API_KEY environment variable.`,
+                'auth'
+            )
+        }
+
+        logger.info(`Initializing LunchMoney API`)
     }
 
     request = async <T extends object | number = { [key: string]: any }>(
@@ -35,6 +47,7 @@ export class LunchMoneyApi {
         endpoint: string,
         args: { [key: string]: any } = {}
     ) => {
+        logger.info(`Lunch Money API request: ${method} ${endpoint}`)
         let res = await doRequest(
             method,
             LM_URL,
@@ -46,7 +59,7 @@ export class LunchMoneyApi {
         let json = (await res.json()) as T | LunchMoneyErrorResponse
 
         if (!res.ok || res.status !== 200) {
-            throw new Error(
+            throw new LMError(
                 `Error fetching Lunch Money API: ${res.status} ${
                     res.statusText
                 } \n ${JSON.stringify(json, null, 2)}`
@@ -55,10 +68,10 @@ export class LunchMoneyApi {
 
         if (typeof json === 'object' && 'error' in json) {
             if (Array.isArray(json.error) && json.error.length > 0) {
-                throw new Error(`Lunch Money API error: ${json.error.join(', ')}`)
+                throw new LMError(`Lunch Money API error: ${json.error.join(', ')}`, 'api')
             }
             if (typeof json.error === 'string' && json.error.length > 0) {
-                throw new Error(`Lunch Money API error: ${json.error}`)
+                throw new LMError(`Lunch Money API error: ${json.error}`, 'api')
             }
         }
 
@@ -66,11 +79,15 @@ export class LunchMoneyApi {
     }
 
     getTransactions = async (query: LMTransactionsQuery = {}) => {
-        return this.request<{ transactions: LMTransaction[]; has_more?: boolean }>(
+        const res = await this.request<{ transactions: LMTransaction[]; has_more?: boolean }>(
             'GET',
             `transactions`,
             query
         )
+        logger.verbose(
+            `Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`
+        )
+        return res
     }
 
     getTransaction = (id: number) => this.request<LMTransaction>('GET', `transactions/${id}`)
@@ -80,20 +97,32 @@ export class LunchMoneyApi {
         transaction: LMUpdateTransactionObject,
         settings?: Omit<LMUpdateTransactionBody, 'transaction'>
     ) => {
+        logger.verbose(`Will attempt to update transaction ${id} with data:`, transaction)
         return this.request<LMUpdateTransactionResponse>('PUT', `transactions/${id}`, {
             transaction,
             ...settings,
         })
     }
 
-    createTransactions = (
+    createTransactions = async (
         transactions: LMInsertTransactionObject[],
         settings?: Omit<LMInsertTransactionsBody, 'transactions'>
     ) => {
-        return this.request<LMInsertTransactionsResponse>('POST', `transactions`, {
+        logger.verbose(`Attempting to create ${transactions.length} LunchMoney transactions`)
+        let res = await this.request<LMInsertTransactionsResponse>('POST', `transactions`, {
             transactions,
             ...settings,
         })
+
+        let createdCount = res.ids.length
+        if (createdCount !== transactions.length) {
+            logger.warn(
+                `Attempted to create ${transactions.length} transactions, but only ${createdCount} were created. There may have been duplicates.`
+            )
+        }
+        logger.verbose(`Created ${res.ids.length} transactions`)
+
+        return res
     }
 
     getAssets = () => this.request<{ assets: LMAsset[] }>('GET', `assets`)
