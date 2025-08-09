@@ -11,11 +11,19 @@ let logger = getLogger()
 export const getTransactionsCommand = () => {
     const program: ChildCommandType = new Command()
 
+    const today = new Date()
+    const defaultStart = new Date(+today - 60 * 60 * 24 * 1000 * 90) // 90 days ago
+    const defaultEnd = today.toISOString().split('T')[0]
+
     return (
         program
             .command('get-transactions')
-            .option('-s, --start <date>', 'Start date for transactions')
-            .option('-e, --end <date>', 'End date for transactions')
+            .option(
+                '-s, --start <date>',
+                'Start date for transactions',
+                defaultStart.toISOString().split('T')[0]
+            )
+            .option('-e, --end <date>', 'End date for transactions', defaultEnd)
             .option('-t, --tag-id <number>', 'Filter transactions by tag ID', parseInt)
             .option('-c, --cat-id <number>', 'Filter transactions by category ID', parseInt)
             .option('-a, --asset <number>', 'Filter transactions by asset ID', parseInt)

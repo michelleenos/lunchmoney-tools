@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { Command } from '@commander-js/extra-typings';
 export declare const getTransactionsCommand: () => Command<[], {
-    start?: string | undefined;
-    end?: string | undefined;
+    start: string;
+    end: string;
     tagId?: number | undefined;
     catId?: number | undefined;
     asset?: number | undefined;
