@@ -1,13 +1,12 @@
 import { Command } from '@commander-js/extra-typings'
-import { ChildCommandType } from '../index.ts'
-import { programWrapper } from '../cli-utils/program-wrapper.ts'
-import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
+import { Table } from 'console-table-printer'
 import { LunchMoneyApi } from '../../api.ts'
-import { splitwiseToLM } from '../../splitwise/splitwise-to-lm.ts'
+import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
 import { getEnvVarNum } from '../../utils/env-vars.ts'
-import { money } from '../cli-utils/write-stuff.ts'
-import { printTable, Table } from 'console-table-printer'
 import { getLogger } from '../cli-utils/logger.ts'
+import { programWrapper } from '../cli-utils/program-wrapper.ts'
+import { money } from '../cli-utils/write-stuff.ts'
+import { ChildCommandType } from '../index.ts'
 
 let logger = getLogger()
 export const splitwiseMatchLMCommand = () => {
@@ -17,16 +16,19 @@ export const splitwiseMatchLMCommand = () => {
 
     return program
         .command('sw-match')
-        .option('-s, --start <date>', 'Start date (default to 2025-01-01)', '2025-01-01')
-        .option('-e, --end <date>', 'End date (default today)', today)
+        .option('-s, --start <date>', 'Start date')
+        .option('-e, --end <date>', 'End date')
+        .option('--sw-group-id <number>', 'Splitwise group ID', parseInt)
+        .option('--sw-api-key <string>', 'Splitwise API key')
+
         .action(
             programWrapper(async (_opts, command) => {
-                const sw = new SplitwiseApi()
+                const { start, end, verbose, swGroupId, swApiKey } = command.optsWithGlobals()
+                const sw = new SplitwiseApi(swApiKey, swGroupId)
                 await sw.init()
 
                 const lm = new LunchMoneyApi()
 
-                const { start, end, verbose } = command.optsWithGlobals()
                 if (verbose) logger.level = 'verbose'
 
                 const swExpenses = await sw.getFilteredExpenses({

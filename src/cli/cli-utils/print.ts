@@ -1,7 +1,7 @@
 import { LMAsset, LMPlaidAccount, LMTransaction } from '../../types/index.ts'
 import { printTable, Table } from 'console-table-printer'
 import { colors } from './ansi-colors.ts'
-import { shorten, money } from './write-stuff.ts'
+import { display, money } from './write-stuff.ts'
 
 // const fieldsOptions = ['id', 'date', 'payee', 'amount', 'tags', 'category', 'account', 'external_id'] as const
 
@@ -57,7 +57,7 @@ export const printTransactions = (
         if (id) row.id = t.id
         if (date) row.date = t.date
         if (payee) {
-            row.payee = shorten(t.payee || 'Unknown')
+            row.payee = display(t.payee || 'Unknown')
             if (t.recurring_payee) {
                 row.payee = `🔄 ${row.payee}`
             }
@@ -68,10 +68,10 @@ export const printTransactions = (
         if (account) {
             let asset = t.asset_display_name || t.asset_name
             let plaid = t.plaid_account_display_name || t.plaid_account_name
-            row.account = shorten(asset || plaid, 20)
+            row.account = display(asset || plaid, 20)
         }
 
-        row.notes = shorten(t.display_notes, 40)
+        row.notes = display(t.display_notes, 40)
 
         if (externalId) row.external_id = t.external_id || ''
 
@@ -86,7 +86,7 @@ export const printAccounts = (accounts: (LMAsset | LMPlaidAccount)[]) => {
         accounts.map((a) => {
             return {
                 id: a.id,
-                name: shorten(a.display_name || a.name),
+                name: display(a.display_name || a.name),
                 balance: money(a.balance),
                 institution: a.institution_name,
             }

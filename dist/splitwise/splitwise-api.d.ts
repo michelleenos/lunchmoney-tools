@@ -44,7 +44,7 @@ export declare class SplitwiseApi {
     groupId: number | null;
     apiKey: string;
     state: SplitwiseApiState;
-    constructor(test?: boolean, skipGroup?: boolean);
+    constructor(apiKey?: string, groupId?: number | false);
     get userId(): number;
     init: () => Promise<this>;
     request: <T = {

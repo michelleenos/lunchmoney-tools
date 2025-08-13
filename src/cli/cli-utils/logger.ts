@@ -1,8 +1,6 @@
 import { createLogger, format, log, Logger, transports } from 'winston'
 
 let logThings: { logger: Logger; consoleTransport: transports.ConsoleTransportInstance }
-// let logger: Logger
-// let consoleTransport: transports.ConsoleTransportInstance
 
 export const getLogger = () => {
     if (!logThings) {
@@ -19,6 +17,8 @@ export const getLogger = () => {
                 format.simple()
             ),
         })
+
+        if (process.env.LOG_LEVEL === 'verbose') logger.level = 'verbose'
 
         logThings = { logger, consoleTransport }
     }

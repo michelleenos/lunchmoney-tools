@@ -29,12 +29,16 @@ const logger = getLogger()
 export class LunchMoneyApi {
     apiKey: string
 
-    constructor(test = false) {
+    constructor(apiKey?: string) {
         try {
-            this.apiKey = getEnvVarString(test ? 'LM_TEST_KEY' : 'LM_API_KEY')
+            if (apiKey) {
+                this.apiKey = apiKey
+            } else {
+                this.apiKey = getEnvVarString('LM_API_KEY')
+            }
         } catch (e) {
             throw new LMError(
-                `Missing Lunch Money API key. Please set the LM_API_KEY environment variable.`,
+                `Missing Lunch Money API key. Please set the LM_API_KEY environment variable or pass the key to the LunchMoneyApi constructor.`,
                 'auth'
             )
         }
@@ -79,15 +83,26 @@ export class LunchMoneyApi {
     }
 
     getTransactions = async (query: LMTransactionsQuery = {}) => {
+        const q = { ...query }
+        if (q.start_date && !q.end_date) {
+            q.end_date = new Date().toISOString().split('T')[0]
+        }
         const res = await this.request<{ transactions: LMTransaction[]; has_more?: boolean }>(
             'GET',
             `transactions`,
-            query
+            q
         )
         logger.verbose(
             `Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`
         )
         return res
+    }
+
+    searchTransactions = (transactions: LMTransaction[], term: string) => {
+        const s = term.toLowerCase()
+        return transactions.filter((t) => {
+            return t.payee?.toLowerCase().includes(s) || t.notes?.toLowerCase().includes(s)
+        })
     }
 
     getTransaction = (id: number) => this.request<LMTransaction>('GET', `transactions/${id}`)
@@ -97,7 +112,7 @@ export class LunchMoneyApi {
         transaction: LMUpdateTransactionObject,
         settings?: Omit<LMUpdateTransactionBody, 'transaction'>
     ) => {
-        logger.verbose(`Will attempt to update transaction ${id} with data:`, transaction)
+        logger.verbose(`Updating transaction ${id} with data:`, transaction)
         return this.request<LMUpdateTransactionResponse>('PUT', `transactions/${id}`, {
             transaction,
             ...settings,

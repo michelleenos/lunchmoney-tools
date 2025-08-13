@@ -15,10 +15,10 @@ export const getAssetsCommand = () => {
 
     return program.command('get-assets').action(
         programWrapper(async (_opts, command) => {
-            const { verbose } = command.optsWithGlobals()
+            const { verbose, apiKey } = command.optsWithGlobals()
             if (verbose) logger.level = 'verbose'
 
-            const lm = new LunchMoneyApi()
+            const lm = new LunchMoneyApi(apiKey)
             const res = await lm.getAssets()
 
             printAccounts(res.assets)
@@ -31,9 +31,9 @@ export const getPlaidAccountsCommand = () => {
 
     return program.command('get-plaid').action(
         programWrapper(async (_opts, command) => {
-            const { verbose } = command.optsWithGlobals()
+            const { verbose, apiKey } = command.optsWithGlobals()
             if (verbose) logger.level = 'verbose'
-            const lm = new LunchMoneyApi()
+            const lm = new LunchMoneyApi(apiKey)
             const res = await lm.getPlaidAccounts()
 
             printAccounts(res.plaid_accounts)
@@ -46,10 +46,10 @@ export const getAccountsCommand = () => {
 
     return program.command('get-accounts').action(
         programWrapper(async (_opts, command) => {
-            const { verbose } = command.optsWithGlobals()
+            const { verbose, apiKey } = command.optsWithGlobals()
             if (verbose) logger.level = 'verbose'
 
-            const lm = new LunchMoneyApi()
+            const lm = new LunchMoneyApi(apiKey)
 
             const plaidRes = await lm.getPlaidAccounts()
             const assetRes = await lm.getAssets()

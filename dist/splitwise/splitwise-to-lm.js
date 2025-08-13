@@ -1,79 +1,35 @@
-import { SplitwiseApi } from "./splitwise-api.js";
-import { LunchMoneyApi } from "../api.js";
-import { money, shorten } from "../cli/cli-utils/write-stuff.js";
-import { LMError } from "../utils/errors.js";
 import { printTable, Table } from 'console-table-printer';
+import { LunchMoneyApi } from "../api.js";
 import { getLogger } from "../cli/cli-utils/logger.js";
+import { display, money } from "../cli/cli-utils/write-stuff.js";
+import { LMError } from "../utils/errors.js";
+import { SplitwiseApi } from "./splitwise-api.js";
+import { getEnvVarNum } from "../utils/env-vars.js";
 const logger = getLogger();
-export const splitwiseToLM = async ({ start, end, assetId, tag = 'splitwise-imported', filterSelf = true, filterPayment = true, dryRun, }) => {
-    const lm = new LunchMoneyApi();
-    const sw = new SplitwiseApi();
+export const splitwiseToLMWithUpdates = async ({ startDate, endDate, assetId: assetIdOpt, tag = 'splitwise-imported', filterSelf = true, filterPayment = true, dryRun, lmApiKey, swApiKey, swGroupId, handleDupes = 'update', lmInsertSettings: { apply_rules = false, check_for_recurring = false, skip_duplicates = true, skip_balance_update = true, debit_as_negative = false, } = {}, }) => {
+    const lm = new LunchMoneyApi(lmApiKey);
+    const sw = new SplitwiseApi(swApiKey, swGroupId);
     await sw.init();
-    const expenses = await sw.getFilteredExpenses({
-        dateAfter: start,
-        dateBefore: end,
-        filterDeleted: true,
-        filterPayment,
-        filterSelf,
-    });
-    logger.info(`Found ${expenses.length} filtered expenses from Splitwise`);
-    const transactions = [];
-    const skipped = [];
-    for (const expense of expenses) {
-        const { id, description, date, cost, repayments, created_by, details } = expense;
-        const userPayment = repayments.find((repayment) => repayment.from === sw.userId)?.amount;
-        if (userPayment === undefined) {
-            logger.warn(`No payment found for user in expense "${shorten(description, 30)}", skipping`);
-            skipped.push(expense);
-            continue;
+    let assetId = assetIdOpt;
+    if (!assetId) {
+        try {
+            assetId = getEnvVarNum('LM_SW_ASSET_ID');
         }
-        const userAmount = parseFloat(userPayment).toFixed(2);
-        transactions.push({
-            date,
-            payee: description,
-            tags: Array.isArray(tag) ? tag : [tag],
-            asset_id: assetId,
-            amount: userAmount,
-            notes: `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`,
-            external_id: id.toString(),
-        });
+        catch (e) {
+            throw new LMError('No asset ID provided; either provide it with --asset-id or set LM_SW_ASSET_ID env variable', 'config');
+        }
+        logger.info(`Using asset ID ${assetId} from LM_SW_ASSET_ID environment variable`);
     }
-    if (skipped.length > 0) {
-        logger.warn(`Skipped ${skipped.length} expenses which did not have a payment from the current user.`);
-    }
-    if (dryRun) {
-        printTable(transactions.map((t) => ({
-            date: t.date,
-            payee: shorten(t.payee || 'Unknown', 30),
-            amount: t.amount,
-            notes: shorten(t.notes || '', 40),
-            external_id: t.external_id,
-        })), {
-            title: `Dry run: ${transactions.length} transactions to be added in Lunch Money`,
-        });
-        return;
-    }
-    return await lm.createTransactions(transactions, {
-        apply_rules: true,
-        check_for_recurring: true,
-        skip_duplicates: true,
-        skip_balance_update: false,
-    });
-};
-export const splitwiseToLMWithUpdates = async ({ start, end, assetId, tag = 'splitwise-imported', filterSelf = true, filterPayment = true, dryRun, }) => {
-    const lm = new LunchMoneyApi();
-    const sw = new SplitwiseApi();
-    await sw.init();
     const expenses = await sw.getFilteredExpenses({
-        dateAfter: start,
-        dateBefore: end,
+        dateAfter: startDate,
+        dateBefore: endDate,
         filterDeleted: true,
         filterPayment,
         filterSelf,
     });
     const lmRes = await lm.getTransactions({
-        end_date: end,
-        start_date: start,
+        start_date: startDate,
+        end_date: endDate,
         asset_id: assetId,
     });
     const transactions = lmRes.transactions;
@@ -88,15 +44,39 @@ export const splitwiseToLMWithUpdates = async ({ start, end, assetId, tag = 'spl
         }
         return acc;
     }, []);
+    const existed = [];
+    const create = [];
     for (const expense of expensesWithPayment) {
-        const { id, description, date, cost, repayments, created_by, details, userPayment } = expense;
-        const existing = transactions.find((t) => t.external_id === `splitwise-${id}` || t.external_id === id.toString());
+        const { id, description, date, cost, created_by, details, userPayment } = expense;
+        let existing = transactions.find((t) => t.external_id === `splitwise-${id}` || t.external_id === id.toString());
         if (existing) {
-            await updateLMItemToMatchSW(lm, expense, existing, dryRun);
+            if (handleDupes === 'skip') {
+                logger.verbose(`Splitwise expense "${display(description, 30)}" already exists in LunchMoney, skipping.`);
+                continue;
+            }
+            let update = getSwToLMUpdateData(expense, existing);
+            existed.push(update);
+            if (update.matches) {
+                logger.verbose(`Splitwise expense "${display(description, 30)}" is already matched in LunchMoney. Skipping update.`);
+                continue;
+            }
+            if (!dryRun) {
+                let updateRes = await lm.updateTransaction(existing.id, {
+                    date: update.correctDate || update.date,
+                    amount: update.correctAmount || update.amount,
+                    notes: update.notes,
+                }, { skip_balance_update, debit_as_negative });
+                if (updateRes.updated) {
+                    logger.info(`Updated transaction ${existing.id} to match Splitwise expense ${id}`);
+                }
+                else {
+                    throw new LMError(`Failed to update transaction ${existing.id} for Splitwise expense ${id}`);
+                }
+            }
         }
         else {
             const newTransaction = {
-                date,
+                date: new Date(date).toISOString().split('T')[0],
                 payee: description,
                 tags: Array.isArray(tag) ? tag : [tag],
                 asset_id: assetId,
@@ -104,15 +84,17 @@ export const splitwiseToLMWithUpdates = async ({ start, end, assetId, tag = 'spl
                 notes: `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`,
                 external_id: `splitwise-${id}`,
             };
+            create.push(newTransaction);
             if (dryRun) {
-                console.log('Dry run - would add transaction:', newTransaction);
+                continue;
             }
             else {
                 let res = await lm.createTransactions([newTransaction], {
-                    apply_rules: true,
-                    check_for_recurring: true,
-                    skip_duplicates: true,
-                    skip_balance_update: false,
+                    apply_rules,
+                    check_for_recurring,
+                    skip_duplicates,
+                    skip_balance_update,
+                    debit_as_negative,
                 });
                 if (res.ids.length === 0) {
                     logger.warn(`Failed to add transaction for Splitwise expense ${id}: ${description}, ${userPayment} on ${date}, might be a duplicate we didn't find`);
@@ -123,55 +105,69 @@ export const splitwiseToLMWithUpdates = async ({ start, end, assetId, tag = 'spl
             }
         }
     }
-    // return await lm.createTransactions(transactions, {
-    //     apply_rules: true,
-    //     check_for_recurring: true,
-    //     skip_duplicates: true,
-    //     skip_balance_update: false,
-    // })
+    if (dryRun) {
+        printTable(create.map((t) => ({
+            date: t.date,
+            payee: display(t.payee, 20),
+            amount: t.amount,
+            notes: display(t.notes, 30),
+            external_id: t.external_id,
+        })), {
+            title: `Dry run: ${create.length} transactions to be added in Lunch Money`,
+        });
+        if (handleDupes === 'update') {
+            let tab = new Table({
+                title: `Dry run: ${existed.length} expenses already in Lunch Money. Unmatched items (in red) will be updated.`,
+                columns: [
+                    { name: 'matches', alignment: 'center' },
+                    { name: 'lmPayee', alignment: 'left', maxLen: 20 },
+                    { name: 'swDesc', alignment: 'left', maxLen: 20 },
+                    { name: 'date', alignment: 'left' },
+                    { name: 'correctDate', alignment: 'left' },
+                    { name: 'amount', alignment: 'right' },
+                    { name: 'correctAmount', alignment: 'right' },
+                    { name: 'notes', maxLen: 40 },
+                ],
+            });
+            existed.forEach((u) => {
+                tab.addRow({
+                    matches: u.matches ? '✓' : '✕',
+                    lmPayee: display(u.lmPayee, 20),
+                    swDesc: display(u.swDesc, 20),
+                    date: u.date,
+                    correctDate: u.correctDate,
+                    amount: u.amount,
+                    correctAmount: u.correctAmount,
+                    notes: display(u.notes, 0),
+                }, { color: u.matches ? undefined : 'red' });
+            });
+            tab.printTable();
+        }
+        return;
+    }
 };
-export const splitwiseToLMItem = async (lm, exp, trs, dryRun = false) => {
-    const { id, description, userPayment, date, cost, repayments, created_by, details } = exp;
-    const existing = trs.find((t) => t.external_id === `splitwise-${id}` || t.external_id === id.toString());
-};
-export const updateLMItemToMatchSW = async (lm, exp, tr, dryRun = false) => {
+const getSwToLMUpdateData = (exp, tr) => {
     let matchedAmount = money(tr.amount) === money(exp.userPayment);
     let trDate = new Date(tr.date).toISOString().split('T')[0];
     let swDate = new Date(exp.date).toISOString().split('T')[0];
     let matchedDate = trDate === swDate;
     let matchedPayee = tr.payee === exp.description;
+    let res = {
+        matches: matchedAmount && matchedDate,
+        lmPayee: display(tr.payee),
+        swDesc: exp.description,
+        date: trDate,
+        amount: money(tr.amount),
+        notes: tr.notes,
+    };
     if (matchedAmount && matchedDate) {
-        logger.verbose(`Splitwise expense "${shorten(exp.description, 30)}" is already matched in LunchMoney. Skipping update.`);
-        return;
+        return res;
     }
-    const t = new Table({
-        title: dryRun ? 'Dry Run: Transaction to Update' : 'Transaction to Update',
-    });
-    t.addRow({ item: 'id', lm: tr.id, sw: exp.id });
-    t.addRow({ item: 'amount', lm: tr.amount, sw: exp.userPayment }, {
-        color: matchedAmount ? undefined : 'yellow',
-    });
-    t.addRow({ item: 'date', lm: trDate, sw: swDate }, {
-        color: matchedDate ? undefined : 'yellow',
-    });
-    t.addRow({ item: 'payee', lm: tr.payee, sw: exp.description }, {
-        color: matchedPayee ? undefined : 'yellow',
-    });
-    if (logger.level === 'verbose') {
-        logger.verbose('Transaction details:', t.render());
-        // t.printTable()
+    if (!matchedDate)
+        res.correctDate = swDate;
+    if (!matchedAmount) {
+        res.correctAmount = exp.userPayment;
+        res.notes = `Splitwise: ${exp.cost} from ${exp.created_by.first_name} (UPDATE). ${tr.notes || ''}`;
     }
-    if (dryRun)
-        return;
-    let res = await lm.updateTransaction(tr.id, {
-        date: swDate,
-        payee: exp.description,
-        amount: exp.userPayment,
-    });
-    if (res.updated) {
-        logger.info(`Updated transaction ${tr.id} to match Splitwise expense ${exp.id}`);
-    }
-    else {
-        throw new LMError(`Failed to update transaction ${tr.id} for Splitwise expense ${exp.id}`);
-    }
+    return res;
 };

@@ -38,8 +38,7 @@ export interface LMInsertTransactionObject {
     tags?: (number | string)[]
 }
 
-export interface LMInsertTransactionsBody {
-    transactions: LMInsertTransactionObject[]
+export interface LMInsertTransactionsSettings {
     /**
      * If true, will apply account’s existing rules to the inserted transactions. Defaults to false.
      * @default false
@@ -65,6 +64,10 @@ export interface LMInsertTransactionsBody {
      * @default true
      */
     skip_balance_update?: boolean
+}
+
+export interface LMInsertTransactionsBody extends LMInsertTransactionsSettings {
+    transactions: LMInsertTransactionObject[]
 }
 
 export type LMInsertTransactionsResponse = {

@@ -9,7 +9,7 @@ import { LMTransactionsQuery } from './types/transactions/query.ts';
 export declare const LM_URL = "https://api.lunchmoney.app/v1";
 export declare class LunchMoneyApi {
     apiKey: string;
-    constructor(test?: boolean);
+    constructor(apiKey?: string);
     request: <T extends object | number = {
         [key: string]: any;
     }>(method: "GET" | "POST" | "PUT", endpoint: string, args?: {
@@ -19,6 +19,7 @@ export declare class LunchMoneyApi {
         transactions: LMTransaction[];
         has_more?: boolean;
     }>;
+    searchTransactions: (transactions: LMTransaction[], term: string) => LMTransaction[];
     getTransaction: (id: number) => Promise<LMTransaction>;
     updateTransaction: (id: number, transaction: LMUpdateTransactionObject, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
     createTransactions: (transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, "transactions">) => Promise<LMInsertTransactionsResponse>;

@@ -75,9 +75,13 @@ export class SplitwiseApi {
     apiKey: string
     state: SplitwiseApiState = { ready: false }
 
-    constructor(test = false, skipGroup = false) {
+    constructor(apiKey?: string, groupId?: number | false) {
         try {
-            this.apiKey = getEnvVarString(test ? 'SW_TEST_KEY' : 'SW_API_KEY')
+            if (apiKey) {
+                this.apiKey = apiKey
+            } else {
+                this.apiKey = getEnvVarString('SW_API_KEY')
+            }
         } catch (e) {
             throw new LMError(
                 `Missing Splitwise API key. Please set the SW_API_KEY environment variable.`,
@@ -85,11 +89,13 @@ export class SplitwiseApi {
             )
         }
 
-        if (skipGroup) {
+        if (groupId === false) {
             this.groupId = null
+        } else if (typeof groupId === 'number') {
+            this.groupId = groupId
         } else {
             try {
-                this.groupId = getEnvVarNum(test ? 'SW_TEST_GROUP_ID' : 'SW_GROUP_ID')
+                this.groupId = getEnvVarNum('SW_GROUP_ID')
             } catch (e) {
                 throw new LMError(
                     `Missing Splitwise group ID. Please set the SW_GROUP_ID environment variable.`,
