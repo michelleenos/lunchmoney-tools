@@ -120,9 +120,6 @@ lm-tools splitwise-to-lm --start-date 2024-01-01 --asset-id 123
 
 # Dry run (preview without importing)
 lm-tools splitwise-to-lm --start-date 2024-01-01 --asset-id 123 --dry-run
-
-# Compare Splitwise expenses with Lunch Money transactions
-lm-tools sw-match --start 2024-01-01 --end 2024-01-31
 ```
 
 ## API Reference
@@ -247,23 +244,6 @@ await splitwiseToLM({
     tag: ['splitwise', 'imported'],
     dryRun: false,
 })
-```
-
-## Error Handling
-
-The package includes a custom error class [`LMError`](src/utils/errors.ts) for API-related errors:
-
-```typescript
-import { LMError } from 'lunchmoney-tools'
-
-try {
-    await lm.getTransactions()
-} catch (error) {
-    if (error instanceof LMError) {
-        console.log(`${error.type} error: ${error.message}`)
-        // Error types: 'auth', 'config', 'api', 'unknown'
-    }
-}
 ```
 
 ## License
