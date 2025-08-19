@@ -26,7 +26,7 @@ export const getTagsCommand = () => {
             programWrapper(async (_opts, command) => {
                 const { verbose, apiKey, archived, sort, description, id } =
                     command.optsWithGlobals()
-                if (verbose) logger.level = 'verbose'
+                if (verbose) logger.level = Infinity
 
                 const lm = new LunchMoneyApi(apiKey)
                 const tags = await lm.getTags({ archived })

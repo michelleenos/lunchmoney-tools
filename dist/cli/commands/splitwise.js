@@ -25,7 +25,7 @@ export const getSplitwiseExpensesCommand = () => {
         const opts = command.optsWithGlobals();
         const { filterPayment, filterSelf, verbose, swApiKey, group } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const sw = new SplitwiseApi(swApiKey, group);
         await sw.init();
         const res = await sw.getFilteredExpenses({
@@ -59,7 +59,7 @@ export const getSplitwiseGroupCommand = () => {
         const opts = command.optsWithGlobals();
         const { verbose, swApiKey, groupId } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const sw = new SplitwiseApi(swApiKey, groupId);
         await sw.init();
         const groupData = await sw.getCurrentGroup();
@@ -91,7 +91,7 @@ export const splitwiseToLMCommand = () => {
         const opts = command.optsWithGlobals();
         let { startDate, endDate, handleDupes, verbose, apiKey } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         if (startDate && !endDate)
             endDate = new Date().toISOString().split('T')[0];
         if (handleDupes !== 'update' && handleDupes !== 'skip') {
@@ -130,7 +130,7 @@ export const lmToSplitwiseCommand = () => {
         const opts = command.optsWithGlobals();
         let { startDate, endDate, verbose, apiKey, tagId, excludeTags } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         if (startDate && !endDate)
             endDate = new Date().toISOString().split('T')[0];
         await lmToSplitwise({

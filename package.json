@@ -27,6 +27,7 @@
     "license": "ISC",
     "packageManager": "pnpm@10.13.1",
     "devDependencies": {
+        "@types/node": "^24.3.0",
         "ts-node": "^10.9.2",
         "tsx": "^4.20.3",
         "typescript": "^5.9.2"
@@ -36,10 +37,10 @@
     },
     "dependencies": {
         "@commander-js/extra-typings": "^14.0.0",
+        "consola": "^3.4.2",
         "console-table-printer": "^2.14.6",
         "dotenv": "^17.2.1",
-        "html-entities": "^2.6.0",
-        "winston": "^3.17.0"
+        "html-entities": "^2.6.0"
     },
     "exports": {
         ".": "./dist/index.js"

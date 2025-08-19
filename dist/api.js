@@ -9,6 +9,8 @@ export class LunchMoneyApi {
     constructor(apiKey) {
         this.request = async (method, endpoint, args = {}) => {
             logger.info(`Lunch Money API request: ${method} ${endpoint}`);
+            if (args)
+                logger.verbose(`Request args: ${JSON.stringify(args, null, 2)}`);
             let res = await doRequest(method, LM_URL, { Authorization: `Bearer ${this.apiKey}` }, endpoint, args);
             let json = (await res.json());
             if (!res.ok || res.status !== 200) {
@@ -99,17 +101,18 @@ export class LunchMoneyApi {
             }
             return res;
         };
+        logger.start(`Initializing LunchMoney API`);
         try {
             if (apiKey) {
                 this.apiKey = apiKey;
             }
             else {
                 this.apiKey = getEnvVarString('LM_API_KEY');
+                logger.info('Using Lunch Money API key from environment variable LM_API_KEY');
             }
         }
         catch (e) {
             throw new LMError(`Missing Lunch Money API key. Please set the LM_API_KEY environment variable or pass the key to the LunchMoneyApi constructor.`, 'auth');
         }
-        logger.info(`Initializing LunchMoney API`);
     }
 }

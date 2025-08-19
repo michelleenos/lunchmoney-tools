@@ -32,11 +32,14 @@ export class LunchMoneyApi {
     apiKey: string
 
     constructor(apiKey?: string) {
+        logger.start(`Initializing LunchMoney API`)
+
         try {
             if (apiKey) {
                 this.apiKey = apiKey
             } else {
                 this.apiKey = getEnvVarString('LM_API_KEY')
+                logger.info('Using Lunch Money API key from environment variable LM_API_KEY')
             }
         } catch (e) {
             throw new LMError(
@@ -44,8 +47,6 @@ export class LunchMoneyApi {
                 'auth'
             )
         }
-
-        logger.info(`Initializing LunchMoney API`)
     }
 
     request = async <T extends object | number = { [key: string]: any }>(
@@ -54,6 +55,7 @@ export class LunchMoneyApi {
         args: { [key: string]: any } = {}
     ) => {
         logger.info(`Lunch Money API request: ${method} ${endpoint}`)
+        if (args) logger.verbose(`Request args: ${JSON.stringify(args, null, 2)}`)
         let res = await doRequest(
             method,
             LM_URL,

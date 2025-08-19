@@ -14,7 +14,7 @@ export const getAssetsCommand = () => {
         .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         const res = await lm.getAssets();
         printAccounts(res.assets);
@@ -28,7 +28,7 @@ export const getPlaidAccountsCommand = () => {
         .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         const res = await lm.getPlaidAccounts();
         printAccounts(res.plaid_accounts);
@@ -42,7 +42,7 @@ export const getAccountsCommand = () => {
         .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         const plaidRes = await lm.getPlaidAccounts();
         const assetRes = await lm.getAssets();

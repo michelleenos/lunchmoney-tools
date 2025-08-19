@@ -1,2 +1,2 @@
-import { Logger } from 'winston';
-export declare const getLogger: () => Logger;
+import { ConsolaInstance } from 'consola';
+export declare const getLogger: () => ConsolaInstance;

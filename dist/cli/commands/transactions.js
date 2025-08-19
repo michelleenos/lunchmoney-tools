@@ -31,7 +31,7 @@ export const getTransactionsCommand = () => {
         const opts = command.optsWithGlobals();
         const { writeFile, search, verbose, apiKey } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         let res = await lm.getTransactions({
             start_date: opts.start,
@@ -89,7 +89,7 @@ export const getTransactionCommand = () => {
         const opts = command.optsWithGlobals();
         const { writeFile, verbose, apiKey } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         const transaction = await lm.getTransaction(parseInt(id));
         if (writeFile) {
@@ -126,7 +126,7 @@ export const updateTransactionCommand = () => {
         const opts = command.optsWithGlobals();
         const { verbose, apiKey, dryRun } = opts;
         if (verbose)
-            logger.level = 'verbose';
+            logger.level = Infinity;
         const lm = new LunchMoneyApi(apiKey);
         const update = {};
         if (opts.amount)

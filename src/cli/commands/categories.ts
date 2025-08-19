@@ -21,7 +21,7 @@ export const getCategoriesCommand = () => {
         .action(
             programWrapper(async (_opts, command) => {
                 const { verbose, apiKey, description, id } = command.optsWithGlobals()
-                if (verbose) logger.level = 'verbose'
+                if (verbose) logger.level = Infinity
 
                 const lm = new LunchMoneyApi(apiKey)
                 const res = await lm.getCategories('nested')

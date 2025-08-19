@@ -29,7 +29,7 @@ export const splitwiseMatchLMCommand = () => {
 
                 const lm = new LunchMoneyApi()
 
-                if (verbose) logger.level = 'verbose'
+                if (verbose) logger.level = Infinity
 
                 const swExpenses = await sw.getFilteredExpenses({
                     dateAfter: start,
