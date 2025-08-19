@@ -1,9 +1,5 @@
 # Lunch Money JS/TS Tools
 
-This package includes a JavaScript client for the Lunch Money API, as well a CLI tool for interacting with Lunch Money transactions and data.
-
-# Lunch Money JS/TS Tools
-
 A TypeScript client for the [Lunch Money API](https://lunchmoney.dev/) with command-line tools and Splitwise integration.
 
 ## ✨ Features
