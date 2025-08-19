@@ -1,3 +1,4 @@
+import 'dotenv/config';
 export const getEnvVarNum = (key) => {
     const value = process.env[key];
     if (value === undefined) {

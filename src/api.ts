@@ -13,7 +13,6 @@ import {
 import {
     LMUpdateTransactionBody,
     LMUpdateTransactionExtra,
-    LMUpdateTransactionObject,
     LMUpdateTransactionResponse,
 } from './types/transactions/update.ts'
 import {
