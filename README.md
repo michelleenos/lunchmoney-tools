@@ -2,6 +2,8 @@
 
 A TypeScript client for the [Lunch Money API](https://lunchmoney.dev/) with command-line tools and Splitwise integration.
 
+I needed a way to manage transactions programatically, particularly for importing/updating multiple expenses at once. While I have tested this library extensively with my own accounts, I have certainly not tested every case. To be safe, try running commands with the `--dry-run` flag first to see what would happen without actually making changes. Please feel free to open issues or PRs if you find bugs or have feature requests!
+
 ## ✨ Features
 
 -   📝 **Full TypeScript Support** with complete type definitions for API responses and requests
@@ -20,15 +22,13 @@ pnpm install lunchmoney-tools
 
 ## Environment Setup
 
-All environment variables can be provided via CLI or to the API client directly, but it is recommended to set them as environment variables for convenience.
-
-To set your Lunch Money API key as a variable, create a `.env` file in your project root:
+All environment variables can be provided via CLI or to the API client directly, but it's recommended to set them as environment variables for convenience. To do so, simply create an `.env` file in your project root:
 
 ```env
 LM_API_KEY=[YOURKEY]
 ```
 
-A Lunch Money API key is required for all operations. To use Splitwise integration, additional variables are required.
+A Lunch Money API key is required for all operations. Additional variables are needed for Splitwise integration.
 
 | Variable         | Description                                                                                              | Required       |
 | ---------------- | -------------------------------------------------------------------------------------------------------- | -------------- |
@@ -215,7 +215,7 @@ Options:
 
 ### [`LunchMoneyApi`](src/api.ts)
 
-Main client for interacting with the Lunch Money API.
+Main client for interacting with Lunch Money.
 
 ```typescript
 class LunchMoneyApi {
