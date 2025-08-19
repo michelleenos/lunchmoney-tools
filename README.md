@@ -12,14 +12,6 @@ I needed a way to manage transactions programatically, particularly for importin
 -   💾 **Data Export** - Option to export data to JSON files
 -   🔄 **Splitwise integration** - Tools for importing expenses from Splitwise to Lunch Money
 
-## Installation
-
-```bash
-npm install lunchmoney-tools
-# or
-pnpm install lunchmoney-tools
-```
-
 ## Environment Setup
 
 All environment variables can be provided via CLI or to the API client directly, but it's recommended to set them as environment variables for convenience. To do so, simply create an `.env` file in your project root:
