@@ -2,6 +2,7 @@ import { doRequest } from "./utils/request.js";
 import { getEnvVarString } from "./utils/env-vars.js";
 import { LMError } from "./utils/errors.js";
 import { getLogger } from "./cli/cli-utils/logger.js";
+import { adjustTags } from "./utils/adjust-tags.js";
 export const LM_URL = `https://api.lunchmoney.app/v1`;
 const logger = getLogger();
 export class LunchMoneyApi {
@@ -29,6 +30,9 @@ export class LunchMoneyApi {
                 q.end_date = new Date().toISOString().split('T')[0];
             }
             const res = await this.request('GET', `transactions`, q);
+            if (res.has_more) {
+                logger.warn(`Important: Response has_more=true. There are more transactions to fetch.`);
+            }
             logger.verbose(`Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`);
             return res;
         };
@@ -39,10 +43,28 @@ export class LunchMoneyApi {
             });
         };
         this.getTransaction = (id) => this.request('GET', `transactions/${id}`);
-        this.updateTransaction = (id, transaction, settings) => {
+        this.updateTransaction = async (id, transaction, settings) => {
             logger.verbose(`Updating transaction ${id} with data:`, transaction);
+            const { addTags, removeTags, appendNotes, prependNotes, ...update } = transaction;
+            if (addTags || removeTags || appendNotes || prependNotes) {
+                logger.verbose(`Need to fetch existing transaction data before updating tags or notes`);
+                const tr = await this.getTransaction(id);
+                if (addTags || removeTags) {
+                    update.tags = adjustTags(tr.tags, { add: addTags, remove: removeTags });
+                }
+                if (appendNotes || prependNotes) {
+                    let hasNotes = tr.notes && tr.notes.length > 0;
+                    if (prependNotes) {
+                        update.notes = `${prependNotes}${hasNotes ? ' ' : ''}${tr.notes || ''}`;
+                        hasNotes = true;
+                    }
+                    if (appendNotes) {
+                        update.notes = `${update.notes || ''}${hasNotes ? ' ' : ''}${appendNotes}`;
+                    }
+                }
+            }
             return this.request('PUT', `transactions/${id}`, {
-                transaction,
+                transaction: update,
                 ...settings,
             });
         };
@@ -69,6 +91,13 @@ export class LunchMoneyApi {
         };
         this.getCurrentUser = async () => {
             return this.request('GET', 'me');
+        };
+        this.getTags = async ({ archived = true } = {}) => {
+            let res = await this.request('GET', 'tags');
+            if (!archived) {
+                res = res.filter((t) => !t.archived);
+            }
+            return res;
         };
         try {
             if (apiKey) {

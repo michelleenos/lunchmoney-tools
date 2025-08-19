@@ -6,53 +6,28 @@ import { LunchMoneyApi } from '../../api.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { ChildCommandType } from '../index.ts'
 import { getLogger } from '../cli-utils/logger.ts'
-import { Table } from 'console-table-printer'
+import { printCategories } from '../cli-utils/print.ts'
 
 const logger = getLogger()
 
 export const getCategoriesCommand = () => {
     const program: ChildCommandType = new Command()
 
-    return program.command('get-categories').action(
-        programWrapper(async (_opts, command) => {
-            const { verbose, apiKey } = command.optsWithGlobals()
-            if (verbose) logger.level = 'verbose'
+    return program
+        .command('get-categories')
+        .description('List Lunch Money categories and IDs')
+        .option('--no-description', 'Do not show category descriptions')
+        .option('--no-id', 'Do not show category IDs')
+        .action(
+            programWrapper(async (_opts, command) => {
+                const { verbose, apiKey, description, id } = command.optsWithGlobals()
+                if (verbose) logger.level = 'verbose'
 
-            const lm = new LunchMoneyApi(apiKey)
-            const res = await lm.getCategories('nested')
+                const lm = new LunchMoneyApi(apiKey)
+                const res = await lm.getCategories('nested')
 
-            const cats = res.categories
-            const t = new Table()
-
-            t.addColumns([
-                { name: 'id', color: 'white' },
-                { name: 'name', alignment: 'left' },
-            ])
-            // t.addColumn({ name: 'name', alignment: 'left' })
-            cats.forEach((c) => {
-                t.addRow(
-                    {
-                        id: c.id,
-                        name: `${c.name} ${c.is_income ? '💰' : ''}`,
-                    },
-                    { color: 'green' }
-                )
-
-                if (c.children) {
-                    let count = c.children.length
-                    c.children.forEach((child, i) => {
-                        t.addRow(
-                            {
-                                id: child.id,
-                                name: `   ${child.name}`,
-                            },
-                            { separator: i === count - 1 ? true : false }
-                        )
-                    })
-                }
+                const cats = res.categories
+                printCategories(cats, { isNested: true, showDescription: description, showId: id })
             })
-
-            t.printTable()
-        })
-    )
+        )
 }

@@ -1,3 +1,4 @@
+import type { SplitwiseUserShares } from './types-shares.ts';
 export interface SplitwiseExpense {
     id: number;
     description: string;
@@ -46,6 +47,12 @@ export interface SplitwiseExpenseCreate {
     group_id: number;
     split_equally: boolean;
 }
+export interface SplitwiseExpenseCreateEqual extends SplitwiseExpenseCreate {
+    split_equally: true;
+}
+export type SplitwiseExpenseCreateUnequal<N extends number> = SplitwiseExpenseCreate & {
+    split_equally: false;
+} & SplitwiseUserShares<N>;
 export type SplitwiseExpenseCreateResponse = {
     expenses: SplitwiseExpense[];
     errors: {};
@@ -85,6 +92,45 @@ export interface SplitwiseGetExpensesQuery {
      * @default 0
      */
     offset?: number;
+}
+export interface SplitwiseDebt {
+    /**
+     * Integer User ID
+     */
+    from: number;
+    /**
+     * Integer User ID
+     */
+    to: number;
+    amount: string;
+    currency_code: string;
+}
+export interface SplitwiseGroup {
+    id: number;
+    name: string;
+    group_type: 'home' | 'trip' | 'couple' | 'apartment' | 'house' | 'other';
+    updated_at: string;
+    simplify_by_default: boolean;
+    members: (SplitwiseUser & {
+        balance: {
+            currency_code: string;
+            amount: string;
+        }[];
+    })[];
+    original_debts: SplitwiseDebt[];
+    simplified_debts: SplitwiseDebt[];
+    avatar: {
+        original: string | null;
+    };
+    custom_avatar: boolean;
+    cover_photo: {
+        xxlarge: string;
+        xlarge: string;
+    };
+    /**
+     * A link the user can send to a friend to join the group directly
+     */
+    invite_link: string;
 }
 /**
  * 401: Invalid API key or OAuth token

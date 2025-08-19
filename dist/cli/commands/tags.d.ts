@@ -1,7 +1,8 @@
 #! /usr/bin/env node
-import 'dotenv/config';
 import { Command } from '@commander-js/extra-typings';
-export declare const getCategoriesCommand: () => Command<[], {
+export declare const getTagsCommand: () => Command<[], {
+    sort?: true | undefined;
+    archived: boolean;
     description: boolean;
     id: boolean;
 }, {

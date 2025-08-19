@@ -72,3 +72,53 @@ export const printAccounts = (accounts) => {
         columns: [{ name: 'id' }, { name: 'name', maxLen: 40 }],
     });
 };
+export const printCategories = (cats, { isNested = true, showDescription = true, showId = true } = {}) => {
+    let columns = [
+        showId && { name: 'id', color: 'white' },
+        { name: 'name', alignment: 'left' },
+        showDescription && { name: 'description', maxLen: 40 },
+    ].filter((c) => c !== false);
+    const t = new Table({
+        columns,
+        enabledColumns: columns.map((c) => c.name),
+    });
+    cats.forEach((c) => {
+        let name = display(c.name, 0);
+        if (c.is_income)
+            name += ' 💰';
+        t.addRow({ id: c.id, name, description: display(c.description, 0) }, { color: isNested ? 'green' : 'white' });
+        if (c.children && isNested) {
+            let count = c.children.length;
+            c.children.forEach((child, i) => {
+                t.addRow({
+                    id: child.id,
+                    name: `   ${child.name}`,
+                    description: display(child.description, 0),
+                }, { separator: i === count - 1 ? true : false });
+            });
+        }
+    });
+    t.printTable();
+};
+export const printTags = (tags, { showId = true, showDescription = true, sort = false, showArchived = true } = {}) => {
+    let columns = [
+        showId && { name: 'id' },
+        { name: 'name', alignment: 'left' },
+        showDescription && { name: 'description', maxLen: 60 },
+        showArchived && { name: 'archived', alignment: 'right' },
+    ].filter((c) => c !== false);
+    const t = new Table({
+        columns,
+        enabledColumns: columns.map((c) => c.name),
+        sort: sort ? (a, b) => a.name.localeCompare(b.name) : undefined,
+    });
+    tags.forEach((tag) => {
+        t.addRow({
+            id: tag.id,
+            name: display(tag.name, 0),
+            description: display(tag.description, 0),
+            archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
+        });
+    });
+    t.printTable();
+};

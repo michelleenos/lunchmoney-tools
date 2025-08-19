@@ -1,3 +1,8 @@
+// type SplitwiseUserShareData<N extends number> = {
+//     [K in `users__${N}__paid_share` | `users__${N}__owed_share`]: string
+// } & {
+//     [K in `users__${N}__user_id`]: number
+// }
 export {};
 // export interface SplitwiseShares3Users
 //     extends SplitwiseUserShareData<0>,

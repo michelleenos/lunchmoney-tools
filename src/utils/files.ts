@@ -8,9 +8,9 @@ export const writeJson = async (dir: string, fileName: string, data: any) => {
 
 export type WriteFilesOpt = boolean | string
 
-export const getDataFilesDir = (writeFiles: WriteFilesOpt, defaultSuffix: string): string => {
+export const getDataFilesDir = (writeFiles: WriteFilesOpt): string => {
     if (typeof writeFiles === 'string') {
         return writeFiles
     }
-    return `.data/${Date.now()}-${defaultSuffix}`
+    return `.lm-tools-data`
 }

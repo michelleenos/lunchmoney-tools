@@ -4,6 +4,7 @@ import { isSplitwiseErrorObject, isSplitwiseErrorString, } from "./types.js";
 import { getEnvVarNum, getEnvVarString } from "../utils/env-vars.js";
 import { LMError } from "../utils/errors.js";
 import { getLogger } from "../cli/cli-utils/logger.js";
+import { splitUnevenlyQuery } from "./utils.js";
 // import { writeJson } from '../utils/files'
 export const SW_URL = 'https://secure.splitwise.com/api/v3.0';
 function assertReady(state) {
@@ -82,13 +83,49 @@ export class SplitwiseApi {
             }
             const allArgs = {
                 ...args,
-                group_id: this.groupId ?? undefined,
-                split_equally: true,
+                group_id: this.groupId,
             };
             return this.request('POST', 'create_expense', allArgs);
         };
+        // createGroupExpenseUnequal = <T extends readonly { id: number; percent: number }[]>(
+        //     expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
+        //     members: T
+        // ): Promise<SplitwiseExpenseCreateResponse> => {
+        //     if (!this.groupId) {
+        //         throw new LMError(
+        //             'Sorry, this package does not support creating Splitwise expenses without a group.',
+        //             'config'
+        //         )
+        //     }
+        //     const shares = splitUnevenlyQuery(members, parseFloat(expense.cost))
+        //     const expenseArgs: SplitwiseExpenseCreateUnequal<T['length']> = {
+        //         ...expense,
+        //         ...shares,
+        //         cost: expense.cost,
+        //         group_id: this.groupId,
+        //         split_equally: false,
+        //     }
+        //     return this.request<SplitwiseExpenseCreateResponse>('POST', 'create_expense', expenseArgs)
+        // }
+        this.getEqualExpenseCreateObject = (expense) => {
+            if (!this.groupId) {
+                throw new LMError('Sorry, this package does not support creating Splitwise expenses without a group.', 'config');
+            }
+            return {
+                ...expense,
+                cost: expense.cost,
+                group_id: this.groupId,
+                split_equally: true,
+            };
+        };
         this.getCurrentUser = async () => {
             return this.request('GET', 'get_current_user');
+        };
+        this.getCurrentGroup = async (groupId) => {
+            if (!groupId && !this.groupId) {
+                throw new LMError('No group ID set. Please set the SW_GROUP_ID environment variable, or pass a group ID to the SplitwiseApi constructor or getCurrentGroup method.', 'config');
+            }
+            return this.request('GET', `get_group/${this.groupId}`);
         };
         try {
             if (apiKey) {
@@ -119,5 +156,30 @@ export class SplitwiseApi {
     get userId() {
         assertReady(this.state);
         return this.state.userId;
+    }
+    getExpenseCreateObject(expense, members) {
+        if (!this.groupId) {
+            throw new LMError('Sorry, this package does not support creating Splitwise expenses without a group.', 'config');
+        }
+        if (members && members.length > 0) {
+            const { shares, userShare } = splitUnevenlyQuery(members, parseFloat(expense.cost));
+            const expenseArgs = {
+                ...expense,
+                ...shares,
+                cost: expense.cost,
+                group_id: this.groupId,
+                split_equally: false,
+            };
+            return expenseArgs;
+        }
+        else {
+            const expenseArgs = {
+                ...expense,
+                cost: expense.cost,
+                group_id: this.groupId,
+                split_equally: true,
+            };
+            return expenseArgs;
+        }
     }
 }

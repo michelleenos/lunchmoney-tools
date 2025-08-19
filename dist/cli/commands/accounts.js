@@ -8,7 +8,10 @@ import { getLogger } from "../cli-utils/logger.js";
 const logger = getLogger();
 export const getAssetsCommand = () => {
     const program = new Command();
-    return program.command('get-assets').action(programWrapper(async (_opts, command) => {
+    return program
+        .command('get-assets')
+        .description('List all manually managed assets')
+        .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
             logger.level = 'verbose';
@@ -19,7 +22,10 @@ export const getAssetsCommand = () => {
 };
 export const getPlaidAccountsCommand = () => {
     const program = new Command();
-    return program.command('get-plaid').action(programWrapper(async (_opts, command) => {
+    return program
+        .command('get-plaid')
+        .description('List all Plaid-linked accounts')
+        .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
             logger.level = 'verbose';
@@ -30,7 +36,10 @@ export const getPlaidAccountsCommand = () => {
 };
 export const getAccountsCommand = () => {
     const program = new Command();
-    return program.command('get-accounts').action(programWrapper(async (_opts, command) => {
+    return program
+        .command('get-accounts')
+        .description('List both Plaid accounts and manually managed assets')
+        .action(programWrapper(async (_opts, command) => {
         const { verbose, apiKey } = command.optsWithGlobals();
         if (verbose)
             logger.level = 'verbose';

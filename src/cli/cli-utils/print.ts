@@ -1,7 +1,8 @@
-import { LMAsset, LMPlaidAccount, LMTransaction } from '../../types/index.ts'
+import { LMAsset, LMCategory, LMPlaidAccount, LMTag, LMTransaction } from '../../types/index.ts'
 import { printTable, Table } from 'console-table-printer'
 import { colors } from './ansi-colors.ts'
 import { display, money } from './write-stuff.ts'
+import { ColumnOptionsRaw } from 'console-table-printer/dist/src/models/external-table.js'
 
 // const fieldsOptions = ['id', 'date', 'payee', 'amount', 'tags', 'category', 'account', 'external_id'] as const
 
@@ -96,4 +97,87 @@ export const printAccounts = (accounts: (LMAsset | LMPlaidAccount)[]) => {
             columns: [{ name: 'id' }, { name: 'name', maxLen: 40 }],
         }
     )
+}
+
+interface PrintCategoriesOpts {
+    isNested?: boolean
+    showDescription?: boolean
+    showId?: boolean
+}
+export const printCategories = (
+    cats: LMCategory[],
+    { isNested = true, showDescription = true, showId = true }: PrintCategoriesOpts = {}
+) => {
+    let columns = [
+        showId && { name: 'id', color: 'white' },
+        { name: 'name', alignment: 'left' },
+        showDescription && { name: 'description', maxLen: 40 },
+    ].filter((c) => c !== false)
+
+    const t = new Table({
+        columns,
+        enabledColumns: columns.map((c) => c.name),
+    })
+
+    cats.forEach((c) => {
+        let name = display(c.name, 0)
+        if (c.is_income) name += ' 💰'
+
+        t.addRow(
+            { id: c.id, name, description: display(c.description, 0) },
+            { color: isNested ? 'green' : 'white' }
+        )
+
+        if (c.children && isNested) {
+            let count = c.children.length
+
+            c.children.forEach((child, i) => {
+                t.addRow(
+                    {
+                        id: child.id,
+                        name: `   ${child.name}`,
+                        description: display(child.description, 0),
+                    },
+                    { separator: i === count - 1 ? true : false }
+                )
+            })
+        }
+    })
+
+    t.printTable()
+}
+
+interface PrintTagsOpts {
+    showId?: boolean
+    showDescription?: boolean
+    sort?: boolean
+    showArchived?: boolean
+}
+export const printTags = (
+    tags: LMTag[],
+    { showId = true, showDescription = true, sort = false, showArchived = true }: PrintTagsOpts = {}
+) => {
+    let columns = [
+        showId && { name: 'id' },
+        { name: 'name', alignment: 'left' },
+        showDescription && { name: 'description', maxLen: 60 },
+        showArchived && { name: 'archived', alignment: 'right' },
+    ].filter((c) => c !== false)
+
+    const t = new Table({
+        columns,
+        enabledColumns: columns.map((c) => c.name),
+        sort: sort ? (a, b) => a.name.localeCompare(b.name) : undefined,
+    })
+
+    tags.forEach((tag) => {
+        t.addRow({
+            id: tag.id,
+            name: display(tag.name, 0),
+            description: display(tag.description, 0),
+            archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
+        })
+    })
+
+    t.printTable()
 }

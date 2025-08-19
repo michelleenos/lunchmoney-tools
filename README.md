@@ -24,69 +24,105 @@ pnpm install lunchmoney-tools
 
 ## Environment Setup
 
-You can provide your API key directly to the API (via command line or JS), or set it as an environment variable. To set an environment variable, create a `.env` file in your project root:
+All environment variables can be provided via CLI or to the API client directly, but it is recommended to set them as environment variables for convenience.
+
+To set your Lunch Money API key as a variable, create a `.env` file in your project root:
 
 ```env
 LM_API_KEY=[YOURKEY]
 ```
 
-(Get your Lunch Money API key from https://my.lunchmoney.app/developers).
+A Lunch Money API key is required for all operations. To use Splitwise integration, additional variables are required.
 
-## API Client Usage
-
-```typescript
-import { LunchMoneyApi } from 'lunchmoney-tools'
-
-// Default, uses API key set in env
-const lm = new LunchMoneyApi()
-
-// or pass API key directly
-const lm = new LunchMoneyApi('your-api-key')
-
-const transactions = await lm.getTransactions({
-    start_date: '2024-01-01',
-    end_date: '2024-01-31',
-})
-
-await lm.createTransactions([
-    {
-        date: '2024-01-15',
-        amount: '25.50',
-        payee: 'Coffee Shop',
-        asset_id: 123,
-        category_id: 456,
-    },
-])
-```
+| Variable         | Description                                                                                              | Required       |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | -------------- |
+| `LM_API_KEY`     | Your Lunch Money API key. Obtain from https://my.lunchmoney.app/developers.                              | Yes            |
+| `SW_API_KEY`     | Splitwise API key (required for Splitwise features). Obtained from https://secure.splitwise.com/apps     | Splitwise only |
+| `SW_GROUP_ID`    | Splitwise group ID - find from Splitwise group URL: `https://secure.splitwise.com/#/groups/[GROUP_ID]/`  | Splitwise only |
+| `LM_SW_ASSET_ID` | ID of Lunch Money asset for importing Splitwise transactions (use `lm-tools get-assets` to find this ID) | Splitwise only |
 
 ## CLI Usage
 
-```bash
-## list all commands
-lm-tools help
+### List of Commands
 
-## view options & details for a specific command
-lm-tools help [command]
-lm-tools help get-transactions
+```bash
+Usage: lm-tools [options] [command]
+
+Options:
+  -v, --verbose                      Enable verbose logging
+  --api-key <KEY>                    Lunch Money API key (if not set will look for LM_API_KEY in env)
+  -h, --help                         display help for command
+
+Commands:
+  get-transactions [options]         List transactions, with optional filtering
+  get-transaction [options] <id>     Get a specific transaction by ID
+  update-transaction [options] <id>  Update a single transaction by ID
+  get-assets                         List all manually managed assets
+  get-plaid                          List all Plaid-linked accounts
+  get-accounts                       List both Plaid accounts and manually managed assets
+  get-categories [options]           List Lunch Money categories and IDs
+  get-tags [options]                 List Lunch Money tags with descriptions and IDs
+  list-sw-expenses [options]         List Splitwise expenses with optional filtering
+  get-splitwise-group [options]      Display information about members of a Splitwise group
+  splitwise-to-lm [options]          Import Splitwise expenses to Lunch Money as transactions
+  lm-to-splitwise [options]          Import Lunch Money transactions to a Splitwise group
+  help [command]                     display help for command
 ```
 
 ### Transactions
 
 ```bash
-# Get recent transactions
-lm-tools get-transactions
+Usage: lm-tools get-transactions [options]
 
-# Get transactions for a specific date range
-lm-tools get-transactions --start 2024-01-01 --end 2024-01-31
+Options:
+  -s, --start <date>        Start date for transactions
+  -e, --end <date>          End date for transactions
+  -t, --tag-id <number>     Filter transactions by tag ID
+  -c, --cat-id <number>     Filter transactions by category ID
+  -a, --asset <number>      Filter transactions by asset ID
+  -p, --plaid <number>      Filter transactions by Plaid account ID
+  -r, --reviewed            only return reviewed transactions
+  -u, --no-reviewed         only return unreviewed transactions
+  --search <string>         Search transactions by payee
+  --show-ext-id             Display transaction external ID in output
+  --show-tags               Display transaction tags in output
+  --no-show-notes           Do not display transaction notes
+  --no-show-category        Do not display category in output
+  --no-show-account         Do not display account in output
+  --no-show-id              Do not display transaction IDs in output
+  --write-file [directory]  Write transactions to a json file instead of printing to console
+  -h, --help                display help for command
+```
 
-# Search transactions
-lm-tools get-transactions --search "coffee"
+#### Get single transaction by ID:
 
-# Filter by category or asset
-lm-tools get-transactions --cat-id 123 --asset 456
+```bash
+Usage: lm-tools get-transaction [options] <id>
 
-# Export to JSON
-lm-tools get-transactions --write-file ./data/
+Options:
+  --show-ext-id             Show transaction external ID
+  --show-tags               Show transaction tags
+  --no-show-category        Do not show transaction category in output
+  --no-show-account         Do not show transaction account in output
+  --no-show-id              Do not show transaction ID in output
+  --show-notes              Show transaction notes
+  --write-file [directory]  Write transaction to a json file instead of printing to console
+  -h, --help                display help for command
+```
+
+#### Update Transaction
+
+```bash
+Usage: lm-tools update-transaction [options] <id>
+
+Options:
+  -a, --amount <amount>       Set transaction amount
+  -n, --notes <notes>         New notes for the transaction
+  -p, --payee <payee>         New payee
+  -t, --tags <tag...>         New transaction tags (space-separated)
+  -c, --category-id <number>  New category ID
+  --dry-run                   Do not actually perform the update, just show what would be done
+  -h, --help                  display help for command
 ```
 
 ### Accounts
@@ -95,38 +131,93 @@ lm-tools get-transactions --write-file ./data/
 # List all accounts (assets + Plaid accounts)
 lm-tools get-accounts
 
-# List only manually managed assets
+# List manually managed assets
 lm-tools get-assets
 
-# List only Plaid accounts
+# List Plaid accounts
 lm-tools get-plaid
 ```
 
-### Categories
+### Categories / Tags
 
 ```bash
 # List all categories
 lm-tools get-categories
+
+# List all tags
+lm-tools get-tags
 ```
 
 ### Splitwise Integration
 
+To use Splitwise integration, you will need to set a Splitwise API key as an environment variable. To import/export transactions you will also need to specify a Splitwise group ID.
+
+To import transactions from Splitwise to Lunch Money, you will also need to specify a Lunch Money asset ID to associate the imported transactions with. This should be a manually managed asset you have created specifically for Splitwise imports.
+
+You can pass these variables to the CLI directly, or set them in an `.env` file at the root of your project:
+
+#### List Splitwise Expenses
+
 ```bash
-# List Splitwise expenses
-lm-tools list-sw-expenses --start-date 2024-01-01
+Usage: lm-tools list-sw-expenses [options]
 
-# Import Splitwise expenses to Lunch Money
-lm-tools splitwise-to-lm --start-date 2024-01-01 --asset-id 123
+List Splitwise expenses with optional filtering
 
-# Dry run (preview without importing)
-lm-tools splitwise-to-lm --start-date 2024-01-01 --asset-id 123 --dry-run
+Options:
+  -s, --start-date <date>
+  -e, --end-date <date>
+  --no-filter-self         Include expenses created by the current user.
+  --no-filter-payment      Include payments.
+  --group <id>             Splitwise group ID
+  --no-group               Do not try to use SW_GROUP_ID environment variable
+  --sw-api-key <string>    Splitwise API key
+  -h, --help               display help for command
+```
+
+#### Import Splitwise Expenses to Lunch Money
+
+```bash
+Usage: lm-tools splitwise-to-lm [options]
+
+Import Splitwise expenses to Lunch Money as transactions
+
+Options:
+  -a, --asset-id <number>  Lunch Money asset ID for Splitwise imports
+  -s, --start-date <date>  Start date
+  -e, --end-date <date>    End date
+  -t, --tag <string...>    Tag(s) to add to each transaction (default: ["splitwise-imported"])
+  --handle-dupes <option>  "update" or "skip" (default "update") (default: "update")
+  --no-filter-self         By default, we will filter out expenses created by the current user; use this flag to include them.
+  --group <id>             Splitwise group ID. If not provided, will use SW_GROUP_ID env var
+  --sw-api-key <string>    Splitwise API key. If not provided, will use SW_API_KEY env var
+  --dry-run                Print transactions to console instead of adding them
+  -h, --help               display help for command
+```
+
+#### Import Lunch Money Transactions to Splitwise
+
+```bash
+Usage: lm-tools lm-to-splitwise [options]
+
+Import Lunch Money transactions to a Splitwise group
+
+Options:
+  -t, --tag-id <number>       Lunch Money tag ID to pull transactions from
+  -s, --start-date <date>     Start date
+  -e, --end-date <date>       End date
+  --exclude-tags <string...>  Tag(s) to exclude, comma-separated (default: ["splitwise-auto-added"])
+  --add-tag <string>          Tag to add to Splitwise expenses (default: "splitwise-auto-added")
+  --shares <string...>        user shares for unequal split. write in format "userId=sharePercent"
+  --remove-tag                Remove the tag from the LM transaction after adding to Splitwise
+  --group <id>                Splitwise group ID. If not provided, will use SW_GROUP_ID env var
+  --sw-api-key <string>       Splitwise API key. If not provided, will use SW_API_KEY env var
+  --dry-run                   Print transactions to console instead of adding them
+  -h, --help                  display help for command
 ```
 
 ## API Reference
 
-### Core Classes
-
-#### [`LunchMoneyApi`](src/api.ts)
+### [`LunchMoneyApi`](src/api.ts)
 
 Main client for interacting with the Lunch Money API.
 
@@ -181,40 +272,26 @@ import type {
 } from 'lunchmoney-tools'
 ```
 
-Key types include:
+Key types:
 
 -   [`LMTransaction`](src/types/transactions/base.ts) - Complete transaction object
--   [`LMTransactionsQuery](src/types/transactions/query.ts) - Interface used to create transactions
+-   [`LMTransactionsQuery`](src/types/transactions/query.ts) - Interface used to create transactions
 -   [`LMTag`](src/types/tags.ts)
 -   [`LMCategory`](src/types/categories.ts)
 -   [`LMAsset` and `LMPlaidAccount`](src/types/assets-and-accounts.ts)
 
-## Configuration
+### API Examples
 
-### Environment Variables
-
-| Variable         | Description                                     | Required |
-| ---------------- | ----------------------------------------------- | -------- |
-| `LM_API_KEY`     | Your Lunch Money API key                        | Yes      |
-| `SW_API_KEY`     | Splitwise API key (for Splitwise features)      | No       |
-| `SW_GROUP_ID`    | Splitwise group ID                              | No       |
-| `LM_SW_ASSET_ID` | Lunch Money asset ID for Splitwise transactions | No       |
-
-### CLI Options
-
-Global options available for all commands:
-
--   `--verbose, -v` - Enable verbose logging
--   `--api-key <key>` - Override API key from environment
-
-## Examples
-
-### Transaction Management
+#### Transaction Management
 
 ```typescript
 import { LunchMoneyApi } from 'lunchmoney-tools'
 
+// Default, uses API key set in env
 const lm = new LunchMoneyApi()
+
+// or pass API key directly
+const lm = new LunchMoneyApi('your-api-key')
 
 // Search for coffee purchases
 const allTransactions = await lm.getTransactions({
@@ -231,7 +308,7 @@ await lm.updateTransaction(12345, {
 })
 ```
 
-### Splitwise Integration
+#### Splitwise Integration
 
 ```typescript
 import { splitwiseToLM } from 'lunchmoney-tools'

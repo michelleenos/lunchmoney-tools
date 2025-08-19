@@ -1,4 +1,4 @@
-import { SplitwiseExpense, SplitwiseExpenseCreate, SplitwiseExpenseCreateResponse, SplitwiseUser } from './types.ts';
+import { SplitwiseExpense, SplitwiseExpenseCreate, SplitwiseExpenseCreateResponse, SplitwiseUser, SplitwiseGroup, SplitwiseExpenseCreateEqual, SplitwiseExpenseCreateUnequal } from './types.ts';
 export declare const SW_URL = "https://secure.splitwise.com/api/v3.0";
 interface GetExpensesOpts {
     /**
@@ -58,9 +58,18 @@ export declare class SplitwiseApi {
     getExpenses: ({ dateAfter, dateBefore }?: GetExpensesOpts) => Promise<SplitwiseExpense[]>;
     getFilteredExpenses: (opts?: FilterExpensesOpts & GetExpensesOpts) => Promise<SplitwiseExpense[]>;
     filterExpenses: (expenses: SplitwiseExpense[], { filterPayment, filterSelf, filterDeleted }?: FilterExpensesOpts) => SplitwiseExpense[];
-    createGroupExpense: (args: Omit<SplitwiseExpenseCreate, "group_id" | "split_equally">) => Promise<SplitwiseExpenseCreateResponse>;
+    createGroupExpense: (args: Omit<SplitwiseExpenseCreateEqual, "group_id"> | Omit<SplitwiseExpenseCreateUnequal<any>, "group_id">) => Promise<SplitwiseExpenseCreateResponse>;
+    getEqualExpenseCreateObject: (expense: Omit<SplitwiseExpenseCreate, "group_id" | "split_equally">) => SplitwiseExpenseCreateEqual;
+    getExpenseCreateObject<T extends {
+        id: number;
+        percent: number;
+    }[]>(expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>, members: T): SplitwiseExpenseCreateUnequal<T['length']>;
+    getExpenseCreateObject(expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>): SplitwiseExpenseCreateEqual;
     getCurrentUser: () => Promise<{
         user: SplitwiseUser;
+    }>;
+    getCurrentGroup: (groupId?: number) => Promise<{
+        group: SplitwiseGroup;
     }>;
 }
 export {};

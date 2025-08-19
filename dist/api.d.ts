@@ -3,9 +3,10 @@ import { LMCategory } from './types/categories.ts';
 import { LMUser } from './types/user.ts';
 import { LMTransaction } from './types/transactions/base.ts';
 import { LMInsertTransactionObject, LMInsertTransactionsBody, LMInsertTransactionsResponse } from './types/transactions/insert.ts';
-import { LMUpdateTransactionBody, LMUpdateTransactionObject, LMUpdateTransactionResponse } from './types/transactions/update.ts';
+import { LMUpdateTransactionBody, LMUpdateTransactionExtra, LMUpdateTransactionResponse } from './types/transactions/update.ts';
 import { LMTransactionGroupCreate } from './types/transactions/groups.ts';
 import { LMTransactionsQuery } from './types/transactions/query.ts';
+import { LMTag } from './types/tags.ts';
 export declare const LM_URL = "https://api.lunchmoney.app/v1";
 export declare class LunchMoneyApi {
     apiKey: string;
@@ -21,7 +22,7 @@ export declare class LunchMoneyApi {
     }>;
     searchTransactions: (transactions: LMTransaction[], term: string) => LMTransaction[];
     getTransaction: (id: number) => Promise<LMTransaction>;
-    updateTransaction: (id: number, transaction: LMUpdateTransactionObject, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
+    updateTransaction: (id: number, transaction: LMUpdateTransactionExtra, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
     createTransactions: (transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, "transactions">) => Promise<LMInsertTransactionsResponse>;
     getAssets: () => Promise<{
         assets: LMAsset[];
@@ -34,4 +35,7 @@ export declare class LunchMoneyApi {
     }>;
     createTransactionGroup: (data: LMTransactionGroupCreate) => Promise<number>;
     getCurrentUser: () => Promise<LMUser>;
+    getTags: ({ archived }?: {
+        archived?: boolean;
+    }) => Promise<LMTag[]>;
 }

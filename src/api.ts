@@ -12,6 +12,7 @@ import {
 } from './types/transactions/insert.ts'
 import {
     LMUpdateTransactionBody,
+    LMUpdateTransactionExtra,
     LMUpdateTransactionObject,
     LMUpdateTransactionResponse,
 } from './types/transactions/update.ts'
@@ -22,6 +23,8 @@ import {
 import { LMTransactionsQuery } from './types/transactions/query.ts'
 import { LMError } from './utils/errors.ts'
 import { getLogger } from './cli/cli-utils/logger.ts'
+import { LMTag } from './types/tags.ts'
+import { adjustTags } from './utils/adjust-tags.ts'
 
 export const LM_URL = `https://api.lunchmoney.app/v1`
 
@@ -92,6 +95,9 @@ export class LunchMoneyApi {
             `transactions`,
             q
         )
+        if (res.has_more) {
+            logger.warn(`Important: Response has_more=true. There are more transactions to fetch.`)
+        }
         logger.verbose(
             `Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`
         )
@@ -107,14 +113,37 @@ export class LunchMoneyApi {
 
     getTransaction = (id: number) => this.request<LMTransaction>('GET', `transactions/${id}`)
 
-    updateTransaction = (
+    updateTransaction = async (
         id: number,
-        transaction: LMUpdateTransactionObject,
+        transaction: LMUpdateTransactionExtra,
         settings?: Omit<LMUpdateTransactionBody, 'transaction'>
     ) => {
         logger.verbose(`Updating transaction ${id} with data:`, transaction)
+
+        const { addTags, removeTags, appendNotes, prependNotes, ...update } = transaction
+
+        if (addTags || removeTags || appendNotes || prependNotes) {
+            logger.verbose(`Need to fetch existing transaction data before updating tags or notes`)
+            const tr = await this.getTransaction(id)
+
+            if (addTags || removeTags) {
+                update.tags = adjustTags(tr.tags, { add: addTags, remove: removeTags })
+            }
+
+            if (appendNotes || prependNotes) {
+                let hasNotes = tr.notes && tr.notes.length > 0
+                if (prependNotes) {
+                    update.notes = `${prependNotes}${hasNotes ? ' ' : ''}${tr.notes || ''}`
+                    hasNotes = true
+                }
+                if (appendNotes) {
+                    update.notes = `${update.notes || ''}${hasNotes ? ' ' : ''}${appendNotes}`
+                }
+            }
+        }
+
         return this.request<LMUpdateTransactionResponse>('PUT', `transactions/${id}`, {
-            transaction,
+            transaction: update,
             ...settings,
         })
     }
@@ -155,5 +184,13 @@ export class LunchMoneyApi {
 
     getCurrentUser = async () => {
         return this.request<LMUser>('GET', 'me')
+    }
+
+    getTags = async ({ archived = true }: { archived?: boolean } = {}) => {
+        let res = await this.request<LMTag[]>('GET', 'tags')
+        if (!archived) {
+            res = res.filter((t) => !t.archived)
+        }
+        return res
     }
 }

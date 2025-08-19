@@ -11,6 +11,13 @@ export declare const getSplitwiseExpensesCommand: () => Command<[], {
     verbose?: true | undefined;
     apiKey?: string | undefined;
 }>;
+export declare const getSplitwiseGroupCommand: () => Command<[], {
+    groupId?: number | undefined;
+    swApiKey?: string | undefined;
+}, {
+    verbose?: true | undefined;
+    apiKey?: string | undefined;
+}>;
 export declare const splitwiseToLMCommand: () => Command<[], {
     assetId?: number | undefined;
     startDate?: string | undefined;
@@ -18,6 +25,24 @@ export declare const splitwiseToLMCommand: () => Command<[], {
     tag: string[];
     handleDupes: string;
     filterSelf: boolean;
+    group?: number | undefined;
+    swApiKey?: string | undefined;
+    dryRun?: true | undefined;
+}, {
+    verbose?: true | undefined;
+    apiKey?: string | undefined;
+}>;
+export declare const lmToSplitwiseCommand: () => Command<[], {
+    tagId: number;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    excludeTags: string[];
+    addTag: string;
+    shares?: {
+        id: number;
+        percent: number;
+    }[] | undefined;
+    removeTag?: true | undefined;
     group?: number | undefined;
     swApiKey?: string | undefined;
     dryRun?: true | undefined;

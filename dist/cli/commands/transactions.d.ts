@@ -7,15 +7,15 @@ export declare const getTransactionsCommand: () => Command<[], {
     catId?: number | undefined;
     asset?: number | undefined;
     plaid?: number | undefined;
-    showNotes?: true | undefined;
+    reviewed?: boolean | undefined;
+    search?: string | undefined;
     showExtId?: true | undefined;
     showTags?: true | undefined;
+    showNotes: boolean;
     showCategory: boolean;
     showAccount: boolean;
     showId: boolean;
-    search?: string | undefined;
     writeFile?: string | true | undefined;
-    reviewed?: boolean | undefined;
 }, {
     verbose?: true | undefined;
     apiKey?: string | undefined;
@@ -28,6 +28,17 @@ export declare const getTransactionCommand: () => Command<[string], {
     showId: boolean;
     showNotes?: true | undefined;
     writeFile?: string | true | undefined;
+}, {
+    verbose?: true | undefined;
+    apiKey?: string | undefined;
+}>;
+export declare const updateTransactionCommand: () => Command<[string], {
+    amount?: string | undefined;
+    notes?: string | undefined;
+    payee?: string | undefined;
+    tags?: string[] | undefined;
+    categoryId?: number | undefined;
+    dryRun?: true | undefined;
 }, {
     verbose?: true | undefined;
     apiKey?: string | undefined;

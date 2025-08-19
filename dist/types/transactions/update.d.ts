@@ -21,3 +21,20 @@ export interface LMUpdateTransactionResponse {
     updated: true;
     split?: number[];
 }
+export interface LMUpdateTransactionExtra extends LMUpdateTransactionObject {
+    addTags?: (string | number)[];
+    /**
+     * Tag names or IDs to remove from the transaction. If set, `tags` option will be ignored.
+     */
+    removeTags?: (number | string)[];
+    /**
+     * Will fetch existing notes and append this string to them.
+     * If set, `notes` option will be ignored.
+     */
+    appendNotes?: string;
+    /**
+     * Will fetch existing notes and prepend this string to them.
+     * If set, `notes` option will be ignored.
+     */
+    prependNotes?: string;
+}

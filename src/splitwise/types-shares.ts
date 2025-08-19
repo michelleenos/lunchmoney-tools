@@ -1,14 +1,14 @@
-type SplitwiseUserShareData<N extends number> = {
-    [K in `users__${N}__paid_share` | `users__${N}__owed_share`]: string
-} & {
-    [K in `users__${N}__user_id`]: number
-}
+// type SplitwiseUserShareData<N extends number> = {
+//     [K in `users__${N}__paid_share` | `users__${N}__owed_share`]: string
+// } & {
+//     [K in `users__${N}__user_id`]: number
+// }
 
-type SplitwiseGroupShareData = {
-    [K in `users__${number}__paid_share` | `users__${number}__owed_share`]: string
-} & {
-    [K in `users__${number}__user_id`]: number
-}
+// type SplitwiseGroupShareData = {
+//     [K in `users__${number}__paid_share` | `users__${number}__owed_share`]: string
+// } & {
+//     [K in `users__${number}__user_id`]: number
+// }
 
 // Utility type to generate a union of numbers from 0 to N-1
 type Range<N extends number, Counter extends any[] = []> = Counter['length'] extends N
@@ -16,8 +16,8 @@ type Range<N extends number, Counter extends any[] = []> = Counter['length'] ext
     : Range<N, [...Counter, Counter['length']]>
 
 // Type that creates an object with all user share properties from 0 through X-1
-type SplitwiseSharesForXUsers<X extends number> = {
-    [K in Range<X> as `users__${K}__paid_share`]: string
+export type SplitwiseUserShares<X extends number> = {
+    [K in Range<X> as `users__${K}__paid_share`]?: string
 } & {
     [K in Range<X> as `users__${K}__owed_share`]: string
 } & {
