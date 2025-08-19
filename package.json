@@ -1,16 +1,29 @@
 {
     "name": "lunchmoney-tools",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "version": "1.0.01",
+    "description": "TypeScript API client and CLI for the Lunch Money API, including Splitwise integration.",
     "type": "module",
     "scripts": {
         "build": "tsc",
         "watch": "tsc --watch",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "keywords": [],
-    "author": "",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/michelleenos/lunchmoney-tools.git"
+    },
+    "homepage": "https://github.com/michelleenos/lunchmoney-tools",
+    "keywords": [
+        "lunchmoney",
+        "javascript",
+        "typescript",
+        "cli",
+        "lunch-money"
+    ],
+    "author": {
+        "name": "Michelle Enos",
+        "url": "https://michelleenos.com"
+    },
     "license": "ISC",
     "packageManager": "pnpm@10.13.1",
     "devDependencies": {
