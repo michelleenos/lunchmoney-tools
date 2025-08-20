@@ -1,9 +1,8 @@
-#! /usr/bin/env node
 import { Command } from '@commander-js/extra-typings';
 import { LunchMoneyApi } from "../../api.js";
-import { programWrapper } from "../cli-utils/program-wrapper.js";
 import { getLogger } from "../cli-utils/logger.js";
 import { printTags } from "../cli-utils/print.js";
+import { programWrapper } from "../cli-utils/program-wrapper.js";
 const logger = getLogger();
 export const getTagsCommand = () => {
     const program = new Command();
@@ -26,25 +25,5 @@ export const getTagsCommand = () => {
             showId: id,
             showDescription: description,
         });
-        // let columns: ColumnOptionsRaw[] = [
-        //     { name: 'id' },
-        //     { name: 'name' },
-        //     { name: 'description', maxLen: 50 },
-        // ]
-        // if (archived) columns.push({ name: 'archived', alignment: 'right' })
-        // let enabledColumns = columns.map((c) => c.name)
-        // printTable(
-        //     tags.map((tag) => ({
-        //         id: tag.id,
-        //         name: tag.name,
-        //         description: display(tag.description, 0),
-        //         archived: archived ? (tag.archived ? 'yes' : 'no') : undefined,
-        //     })),
-        //     {
-        //         columns,
-        //         enabledColumns,
-        //         sort: sort ? (a, b) => a.name.localeCompare(b.name) : undefined,
-        //     }
-        // )
     }));
 };

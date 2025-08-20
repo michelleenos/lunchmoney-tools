@@ -4,7 +4,6 @@ import { display, money } from "./write-stuff.js";
 export const printTransactions = (transactions, { id = true, date = true, payee = true, amount = true, tags = false, category = true, account = true, notes = false, externalId = false, } = {}) => {
     const p = new Table({
         colorMap: {
-            // custom: `\x1b[38;5;${colors.mistyRose1}m`,
             gray: `\x1b[38;5;${colors['Grey7'].code}m`,
         },
     });

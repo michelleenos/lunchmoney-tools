@@ -1,4 +1,3 @@
-#! /usr/bin/env node
 import { Command } from '@commander-js/extra-typings';
 export declare const getTagsCommand: () => Command<[], {
     sort?: true | undefined;

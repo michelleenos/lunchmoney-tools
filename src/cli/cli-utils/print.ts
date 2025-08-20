@@ -2,9 +2,6 @@ import { LMAsset, LMCategory, LMPlaidAccount, LMTag, LMTransaction } from '../..
 import { printTable, Table } from 'console-table-printer'
 import { colors } from './ansi-colors.ts'
 import { display, money } from './write-stuff.ts'
-import { ColumnOptionsRaw } from 'console-table-printer/dist/src/models/external-table.js'
-
-// const fieldsOptions = ['id', 'date', 'payee', 'amount', 'tags', 'category', 'account', 'external_id'] as const
 
 type PrintTransactionShow = {
     id?: boolean
@@ -34,7 +31,6 @@ export const printTransactions = (
 ) => {
     const p = new Table({
         colorMap: {
-            // custom: `\x1b[38;5;${colors.mistyRose1}m`,
             gray: `\x1b[38;5;${colors['Grey7'].code}m`,
         },
     })

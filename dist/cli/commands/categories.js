@@ -1,4 +1,3 @@
-#! /usr/bin/env node
 import { Command } from '@commander-js/extra-typings';
 import { LunchMoneyApi } from "../../api.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";

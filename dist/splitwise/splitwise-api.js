@@ -1,11 +1,9 @@
-// import { doRequest } from '../utils/request'
 import { doRequest } from "../utils/request.js";
 import { isSplitwiseErrorObject, isSplitwiseErrorString, } from "./types.js";
 import { getEnvVarNum, getEnvVarString } from "../utils/env-vars.js";
 import { LMError } from "../utils/errors.js";
 import { getLogger } from "../cli/cli-utils/logger.js";
 import { splitUnevenlyQuery } from "./utils.js";
-// import { writeJson } from '../utils/files'
 export const SW_URL = 'https://secure.splitwise.com/api/v3.0';
 function assertReady(state) {
     if (!state.ready) {
@@ -29,7 +27,6 @@ export class SplitwiseApi {
                 logger.verbose(`Request args:`, args);
             let res = await doRequest(method, SW_URL, { Authorization: `Bearer ${this.apiKey}` }, endpoint, args);
             const json = await res.json();
-            // await writeJson('.data', `${Date.now()}-splitwise-${endpoint}.json`, res)
             if (!res.ok || res.status !== 200) {
                 if (isSplitwiseErrorObject(json)) {
                     throw new LMError(`Splitwise API error: ${json.errors.base.join(', ')}`, 'api');
@@ -87,26 +84,6 @@ export class SplitwiseApi {
             };
             return this.request('POST', 'create_expense', allArgs);
         };
-        // createGroupExpenseUnequal = <T extends readonly { id: number; percent: number }[]>(
-        //     expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
-        //     members: T
-        // ): Promise<SplitwiseExpenseCreateResponse> => {
-        //     if (!this.groupId) {
-        //         throw new LMError(
-        //             'Sorry, this package does not support creating Splitwise expenses without a group.',
-        //             'config'
-        //         )
-        //     }
-        //     const shares = splitUnevenlyQuery(members, parseFloat(expense.cost))
-        //     const expenseArgs: SplitwiseExpenseCreateUnequal<T['length']> = {
-        //         ...expense,
-        //         ...shares,
-        //         cost: expense.cost,
-        //         group_id: this.groupId,
-        //         split_equally: false,
-        //     }
-        //     return this.request<SplitwiseExpenseCreateResponse>('POST', 'create_expense', expenseArgs)
-        // }
         this.getEqualExpenseCreateObject = (expense) => {
             if (!this.groupId) {
                 throw new LMError('Sorry, this package does not support creating Splitwise expenses without a group.', 'config');

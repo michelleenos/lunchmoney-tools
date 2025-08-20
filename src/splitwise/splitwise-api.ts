@@ -1,4 +1,3 @@
-// import { doRequest } from '../utils/request'
 import { doRequest } from '../utils/request.ts'
 import {
     isSplitwiseErrorObject,
@@ -18,7 +17,6 @@ import { getEnvVarNum, getEnvVarString } from '../utils/env-vars.ts'
 import { LMError } from '../utils/errors.ts'
 import { getLogger } from '../cli/cli-utils/logger.ts'
 import { splitUnevenlyQuery } from './utils.ts'
-// import { writeJson } from '../utils/files'
 
 export const SW_URL = 'https://secure.splitwise.com/api/v3.0'
 
@@ -149,7 +147,6 @@ export class SplitwiseApi {
         )
 
         const json: T | SplitwiseErrorObject | SplitwiseErrorString = await res.json()
-        // await writeJson('.data', `${Date.now()}-splitwise-${endpoint}.json`, res)
         if (!res.ok || res.status !== 200) {
             if (isSplitwiseErrorObject(json)) {
                 throw new LMError(`Splitwise API error: ${json.errors.base.join(', ')}`, 'api')
@@ -235,28 +232,6 @@ export class SplitwiseApi {
         }
         return this.request<SplitwiseExpenseCreateResponse>('POST', 'create_expense', allArgs)
     }
-
-    // createGroupExpenseUnequal = <T extends readonly { id: number; percent: number }[]>(
-    //     expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
-    //     members: T
-    // ): Promise<SplitwiseExpenseCreateResponse> => {
-    //     if (!this.groupId) {
-    //         throw new LMError(
-    //             'Sorry, this package does not support creating Splitwise expenses without a group.',
-    //             'config'
-    //         )
-    //     }
-
-    //     const shares = splitUnevenlyQuery(members, parseFloat(expense.cost))
-    //     const expenseArgs: SplitwiseExpenseCreateUnequal<T['length']> = {
-    //         ...expense,
-    //         ...shares,
-    //         cost: expense.cost,
-    //         group_id: this.groupId,
-    //         split_equally: false,
-    //     }
-    //     return this.request<SplitwiseExpenseCreateResponse>('POST', 'create_expense', expenseArgs)
-    // }
 
     getEqualExpenseCreateObject = (
         expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>

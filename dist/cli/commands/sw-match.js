@@ -41,14 +41,6 @@ export const splitwiseMatchLMCommand = () => {
             }
             let tr = lmTransactions.transactions.find((t) => t.external_id === expense.id.toString() ||
                 t.external_id === `splitwise-${expense.id}`);
-            // if (!tr) {
-            //     tr = lmTransactions.transactions.find((t) => {
-            //         if (t.payee !== expense.description) return false
-            //         if (money(t.amount) !== money(userPayment)) return false
-            //         // if (t.external_id !== expense.id.toString()) return false
-            //         return true
-            //     })
-            // }
             if (tr) {
                 let lmDate = new Date(tr.date).toISOString().split('T')[0];
                 let swDate = new Date(expense.date).toISOString().split('T')[0];
