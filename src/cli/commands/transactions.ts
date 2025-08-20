@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { Command } from '@commander-js/extra-typings'
 import { LunchMoneyApi } from '../../api.ts'
 import { writeJson } from '../../utils/files.ts'

@@ -1,10 +1,10 @@
 {
     "name": "lunchmoney-tools",
-    "version": "1.0.04",
+    "version": "1.0.05",
     "description": "TypeScript API client and CLI for the Lunch Money API, including Splitwise integration.",
     "type": "module",
     "scripts": {
-        "build": "tsc",
+        "build": "rm -rf dist && tsc",
         "watch": "tsc --watch",
         "test": "echo \"Error: no test specified\" && exit 1"
     },

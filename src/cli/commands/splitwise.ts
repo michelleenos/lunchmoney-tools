@@ -1,15 +1,13 @@
-import 'dotenv/config'
 import { Command } from '@commander-js/extra-typings'
-import { printTable, Table } from 'console-table-printer'
+import { printTable } from 'console-table-printer'
+import { lmToSplitwise } from '../../splitwise/lm-to-splitwise.ts'
 import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
 import { splitwiseToLMWithUpdates } from '../../splitwise/splitwise-to-lm.ts'
-import { getEnvVarNum } from '../../utils/env-vars.ts'
 import { LMError } from '../../utils/errors.ts'
 import { getLogger } from '../cli-utils/logger.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { display, money } from '../cli-utils/write-stuff.ts'
 import { ChildCommandType, RootProgramOpts } from '../index.ts'
-import { lmToSplitwise } from '../../splitwise/lm-to-splitwise.ts'
 
 const logger = getLogger()
 

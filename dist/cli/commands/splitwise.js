@@ -1,13 +1,12 @@
-import 'dotenv/config';
 import { Command } from '@commander-js/extra-typings';
 import { printTable } from 'console-table-printer';
+import { lmToSplitwise } from "../../splitwise/lm-to-splitwise.js";
 import { SplitwiseApi } from "../../splitwise/splitwise-api.js";
 import { splitwiseToLMWithUpdates } from "../../splitwise/splitwise-to-lm.js";
 import { LMError } from "../../utils/errors.js";
 import { getLogger } from "../cli-utils/logger.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
 import { display, money } from "../cli-utils/write-stuff.js";
-import { lmToSplitwise } from "../../splitwise/lm-to-splitwise.js";
 const logger = getLogger();
 export const getSplitwiseExpensesCommand = () => {
     const program = new Command();

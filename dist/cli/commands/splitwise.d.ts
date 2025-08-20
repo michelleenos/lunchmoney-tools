@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { Command } from '@commander-js/extra-typings';
 export declare const getSplitwiseExpensesCommand: () => Command<[], {
     startDate?: string | undefined;

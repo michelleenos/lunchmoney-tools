@@ -1,6 +1,5 @@
 #! /usr/bin/env node
 
-import 'dotenv/config'
 import { Command } from '@commander-js/extra-typings'
 import {
     getTransactionCommand,

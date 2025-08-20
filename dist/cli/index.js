@@ -1,5 +1,4 @@
 #! /usr/bin/env node
-import 'dotenv/config';
 import { Command } from '@commander-js/extra-typings';
 import { getTransactionCommand, getTransactionsCommand, updateTransactionCommand, } from "./commands/transactions.js";
 import { getAccountsCommand, getAssetsCommand, getPlaidAccountsCommand, } from "./commands/accounts.js";
