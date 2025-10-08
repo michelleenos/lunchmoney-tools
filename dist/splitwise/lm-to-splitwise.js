@@ -12,6 +12,7 @@ export const lmToSplitwise = async ({ lmApiKey, swApiKey, swGroupId, dryRun, tag
         limit: 1000,
         start_date: startDate,
         end_date: endDate,
+        pending: false,
     });
     const unableItems = [];
     const items = [];

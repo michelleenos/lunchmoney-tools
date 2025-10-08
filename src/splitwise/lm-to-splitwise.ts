@@ -43,6 +43,7 @@ export const lmToSplitwise = async ({
         limit: 1000,
         start_date: startDate,
         end_date: endDate,
+        pending: false,
     })
 
     const unableItems: {
