@@ -149,6 +149,13 @@ export class LunchMoneyApi {
         })
     }
 
+    unsplitTransactions = async (parentIds: number[], removeParents = false) => {
+        return this.request<number[]>('POST', 'transactions/unsplit', {
+            parent_ids: parentIds,
+            remove_parents: removeParents,
+        })
+    }
+
     createTransactions = async (
         transactions: LMInsertTransactionObject[],
         settings?: Omit<LMInsertTransactionsBody, 'transactions'>

@@ -23,6 +23,7 @@ export declare class LunchMoneyApi {
     searchTransactions: (transactions: LMTransaction[], term: string) => LMTransaction[];
     getTransaction: (id: number) => Promise<LMTransaction>;
     updateTransaction: (id: number, transaction: LMUpdateTransactionExtra, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
+    unsplitTransactions: (parentIds: number[], removeParents?: boolean) => Promise<number[]>;
     createTransactions: (transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, "transactions">) => Promise<LMInsertTransactionsResponse>;
     getAssets: () => Promise<{
         assets: LMAsset[];

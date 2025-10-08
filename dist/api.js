@@ -70,6 +70,12 @@ export class LunchMoneyApi {
                 ...settings,
             });
         };
+        this.unsplitTransactions = async (parentIds, removeParents = false) => {
+            return this.request('POST', 'transactions/unsplit', {
+                parent_ids: parentIds,
+                remove_parents: removeParents,
+            });
+        };
         this.createTransactions = async (transactions, settings) => {
             logger.verbose(`Attempting to create ${transactions.length} LunchMoney transactions`);
             let res = await this.request('POST', `transactions`, {

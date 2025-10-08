@@ -1,10 +1,23 @@
-import { LMInsertTransactionObject } from './insert.ts';
 import { LMTransactionSplit } from './base.ts';
-export type LMUpdateTransactionObject = Partial<LMInsertTransactionObject> & {
-    split?: LMTransactionSplit[];
+export type LMUpdateTransactionObject = {
+    date?: string;
+    category_id?: number;
+    payee?: string;
+    amount?: number | string;
+    curency?: string;
+    asset_id?: number;
+    plaid_account_id?: number;
+    recurring_id?: number;
+    notes?: string;
+    status?: 'cleared' | 'uncleared';
+    /**
+     * User-defined external ID for transaction. Max 75 characters. External IDs must be unique within the same asset_id. You may only update this if this transaction was not created from an automatic import, i.e. if this transaction is not associated with a plaid_account_id
+     */
+    external_id?: string;
+    tags?: (string | number)[];
 };
 export interface LMUpdateTransactionBody {
-    split?: number[];
+    split?: LMTransactionSplit[];
     transaction?: LMUpdateTransactionObject;
     /**
      * If true, will assume negative amount values denote expenses and positive amount values denote credits. Defaults to false.
