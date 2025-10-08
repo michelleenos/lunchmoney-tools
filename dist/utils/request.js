@@ -3,7 +3,7 @@ export const doRequest = async (method, baseUrl, headersInput = {}, endpoint, ar
     const headers = {
         ...headersInput,
     };
-    if (method === 'GET') {
+    if (method === 'GET' || method === 'DELETE') {
         Object.entries(args).forEach(([key, value]) => {
             if (value !== undefined) {
                 url.searchParams.append(key, value);

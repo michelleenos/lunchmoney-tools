@@ -76,6 +76,12 @@ export class LunchMoneyApi {
                 remove_parents: removeParents,
             });
         };
+        this.getTransactionGroup = async (id) => {
+            return this.request('GET', `transactions/group/${id}`);
+        };
+        this.deleteTransactionGroup = async (id) => {
+            return this.request('DELETE', `transactions/group/${id}`);
+        };
         this.createTransactions = async (transactions, settings) => {
             logger.verbose(`Attempting to create ${transactions.length} LunchMoney transactions`);
             let res = await this.request('POST', `transactions`, {

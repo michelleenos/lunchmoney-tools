@@ -1,5 +1,5 @@
 export const doRequest = async (
-    method: 'GET' | 'POST' | 'PUT',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     baseUrl: string,
     headersInput: Record<string, string> = {},
     endpoint: string,
@@ -10,7 +10,7 @@ export const doRequest = async (
         ...headersInput,
     }
 
-    if (method === 'GET') {
+    if (method === 'GET' || method === 'DELETE') {
         Object.entries(args).forEach(([key, value]) => {
             if (value !== undefined) {
                 url.searchParams.append(key, value)

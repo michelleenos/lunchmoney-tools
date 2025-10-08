@@ -73,7 +73,7 @@ export const lmToSplitwise = async ({ lmApiKey, swApiKey, swGroupId, dryRun, tag
                 t.addColumn({ name: key, title: `${key.slice(0, 7)} ${key.slice(7)}` });
             }
             else {
-                t.addColumn({ name: key });
+                t.addColumn({ name: key, maxLen: key === 'description' ? 40 : undefined });
             }
         });
         itemObjects.forEach((tItem) => t.addRow(tItem));

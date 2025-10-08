@@ -50,7 +50,7 @@ export class LunchMoneyApi {
     }
 
     request = async <T extends object | number = { [key: string]: any }>(
-        method: 'GET' | 'POST' | 'PUT',
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
         endpoint: string,
         args: { [key: string]: any } = {}
     ) => {
@@ -154,6 +154,14 @@ export class LunchMoneyApi {
             parent_ids: parentIds,
             remove_parents: removeParents,
         })
+    }
+
+    getTransactionGroup = async (id: number) => {
+        return this.request<LMTransaction>('GET', `transactions/group/${id}`)
+    }
+
+    deleteTransactionGroup = async (id: number) => {
+        return this.request<{ transactions: number[] }>('DELETE', `transactions/group/${id}`)
     }
 
     createTransactions = async (

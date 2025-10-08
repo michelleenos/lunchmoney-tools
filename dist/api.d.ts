@@ -13,7 +13,7 @@ export declare class LunchMoneyApi {
     constructor(apiKey?: string);
     request: <T extends object | number = {
         [key: string]: any;
-    }>(method: "GET" | "POST" | "PUT", endpoint: string, args?: {
+    }>(method: "GET" | "POST" | "PUT" | "DELETE", endpoint: string, args?: {
         [key: string]: any;
     }) => Promise<T>;
     getTransactions: (query?: LMTransactionsQuery) => Promise<{
@@ -24,6 +24,10 @@ export declare class LunchMoneyApi {
     getTransaction: (id: number) => Promise<LMTransaction>;
     updateTransaction: (id: number, transaction: LMUpdateTransactionExtra, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
     unsplitTransactions: (parentIds: number[], removeParents?: boolean) => Promise<number[]>;
+    getTransactionGroup: (id: number) => Promise<LMTransaction>;
+    deleteTransactionGroup: (id: number) => Promise<{
+        transactions: number[];
+    }>;
     createTransactions: (transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, "transactions">) => Promise<LMInsertTransactionsResponse>;
     getAssets: () => Promise<{
         assets: LMAsset[];

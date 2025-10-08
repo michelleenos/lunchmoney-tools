@@ -114,7 +114,7 @@ export const lmToSplitwise = async ({
             if (key.startsWith('users__')) {
                 t.addColumn({ name: key, title: `${key.slice(0, 7)} ${key.slice(7)}` })
             } else {
-                t.addColumn({ name: key })
+                t.addColumn({ name: key, maxLen: key === 'description' ? 40 : undefined })
             }
         })
 
