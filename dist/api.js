@@ -3,7 +3,7 @@ import { getEnvVarString } from "./utils/env-vars.js";
 import { LMError } from "./utils/errors.js";
 import { getLogger } from "./cli/cli-utils/logger.js";
 import { adjustTags } from "./utils/adjust-tags.js";
-export const LM_URL = `https://api.lunchmoney.app/v1`;
+export const LM_URL = `https://dev.lunchmoney.app/v1/`;
 const logger = getLogger();
 export class LunchMoneyApi {
     constructor(apiKey) {

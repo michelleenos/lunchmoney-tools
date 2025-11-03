@@ -1,6 +1,6 @@
 {
     "name": "lunchmoney-tools",
-    "version": "1.0.05",
+    "version": "1.0.06",
     "description": "TypeScript API client and CLI for the Lunch Money API, including Splitwise integration.",
     "type": "module",
     "scripts": {
