@@ -25,7 +25,7 @@ import { getLogger } from './cli/cli-utils/logger.ts'
 import { LMTag } from './types/tags.ts'
 import { adjustTags } from './utils/adjust-tags.ts'
 
-export const LM_URL = `https://dev.lunchmoney.app/v1/`
+export const LM_URL = `https://dev.lunchmoney.app/v1`
 
 const logger = getLogger()
 export class LunchMoneyApi {

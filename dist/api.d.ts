@@ -7,7 +7,7 @@ import { LMUpdateTransactionBody, LMUpdateTransactionExtra, LMUpdateTransactionR
 import { LMTransactionGroupCreate } from './types/transactions/groups.ts';
 import { LMTransactionsQuery } from './types/transactions/query.ts';
 import { LMTag } from './types/tags.ts';
-export declare const LM_URL = "https://dev.lunchmoney.app/v1/";
+export declare const LM_URL = "https://dev.lunchmoney.app/v1";
 export declare class LunchMoneyApi {
     apiKey: string;
     constructor(apiKey?: string);
