@@ -6,7 +6,8 @@
     "scripts": {
         "build": "rm -rf dist && tsc",
         "watch": "tsc --watch",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "vitest --ui",
+        "test:coverage": "vitest --coverage"
     },
     "repository": {
         "type": "git",
@@ -28,9 +29,12 @@
     "packageManager": "pnpm@10.13.1",
     "devDependencies": {
         "@types/node": "^24.3.0",
+        "@vitest/coverage-v8": "4.0.8",
+        "@vitest/ui": "^4.0.8",
         "ts-node": "^10.9.2",
         "tsx": "^4.20.3",
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.2",
+        "vitest": "^4.0.8"
     },
     "bin": {
         "lm-tools": "dist/cli/index.js"

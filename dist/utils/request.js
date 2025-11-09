@@ -16,7 +16,7 @@ export const doRequest = async (method, baseUrl, headersInput = {}, endpoint, ar
     const res = await fetch(url.toString(), {
         method,
         headers,
-        body: method !== 'GET' ? JSON.stringify(args) : undefined,
+        body: method !== 'GET' && method !== 'DELETE' ? JSON.stringify(args) : undefined,
     });
     return res;
 };

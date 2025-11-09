@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CLI commands > should handle missing API key > cli-api-key-error 1`] = `[Error: Command failed: npx tsx src/cli/index.ts get-transactions]`;

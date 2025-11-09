@@ -14,7 +14,12 @@ export class LunchMoneyApi {
             let res = await doRequest(method, LM_URL, { Authorization: `Bearer ${this.apiKey}` }, endpoint, args);
             let json = (await res.json());
             if (!res.ok || res.status !== 200) {
-                throw new LMError(`Error fetching Lunch Money API: ${res.status} ${res.statusText} \n ${JSON.stringify(json, null, 2)}`);
+                if (res.status === 401 && res.statusText === 'Unauthorized') {
+                    throw new LMError('Invalid API key', 'auth');
+                }
+                else {
+                    throw new LMError(`Error fetching Lunch Money API: ${res.status} ${res.statusText} \n ${JSON.stringify(json, null, 2)}`);
+                }
             }
             if (typeof json === 'object' && 'error' in json) {
                 if (Array.isArray(json.error) && json.error.length > 0) {
@@ -32,10 +37,7 @@ export class LunchMoneyApi {
                 q.end_date = new Date().toISOString().split('T')[0];
             }
             const res = await this.request('GET', `transactions`, q);
-            if (res.has_more) {
-                logger.warn(`Important: Response has_more=true. There are more transactions to fetch.`);
-            }
-            logger.verbose(`Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`);
+            logger.verbose(`Fetched ${res.transactions.length} transactions from Lunch Money.`);
             return res;
         };
         this.searchTransactions = (transactions, term) => {
@@ -56,13 +58,15 @@ export class LunchMoneyApi {
                 }
                 if (appendNotes || prependNotes) {
                     let hasNotes = tr.notes && tr.notes.length > 0;
+                    let newNotes = tr.notes || '';
                     if (prependNotes) {
-                        update.notes = `${prependNotes}${hasNotes ? ' ' : ''}${tr.notes || ''}`;
+                        newNotes = `${prependNotes}${hasNotes ? ' ' : ''}${newNotes || ''}`;
                         hasNotes = true;
                     }
                     if (appendNotes) {
-                        update.notes = `${update.notes || ''}${hasNotes ? ' ' : ''}${appendNotes}`;
+                        newNotes = `${newNotes || ''}${hasNotes ? ' ' : ''}${appendNotes}`;
                     }
+                    update.notes = newNotes;
                 }
             }
             return this.request('PUT', `transactions/${id}`, {

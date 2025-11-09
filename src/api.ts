@@ -67,11 +67,15 @@ export class LunchMoneyApi {
         let json = (await res.json()) as T | LunchMoneyErrorResponse
 
         if (!res.ok || res.status !== 200) {
-            throw new LMError(
-                `Error fetching Lunch Money API: ${res.status} ${
-                    res.statusText
-                } \n ${JSON.stringify(json, null, 2)}`
-            )
+            if (res.status === 401 && res.statusText === 'Unauthorized') {
+                throw new LMError('Invalid API key', 'auth')
+            } else {
+                throw new LMError(
+                    `Error fetching Lunch Money API: ${res.status} ${
+                        res.statusText
+                    } \n ${JSON.stringify(json, null, 2)}`
+                )
+            }
         }
 
         if (typeof json === 'object' && 'error' in json) {
@@ -96,12 +100,7 @@ export class LunchMoneyApi {
             `transactions`,
             q
         )
-        if (res.has_more) {
-            logger.warn(`Important: Response has_more=true. There are more transactions to fetch.`)
-        }
-        logger.verbose(
-            `Fetched ${res.transactions.length} transactions from Lunch Money. has_more is ${res.has_more}`
-        )
+        logger.verbose(`Fetched ${res.transactions.length} transactions from Lunch Money.`)
         return res
     }
 
@@ -133,13 +132,15 @@ export class LunchMoneyApi {
 
             if (appendNotes || prependNotes) {
                 let hasNotes = tr.notes && tr.notes.length > 0
+                let newNotes = tr.notes || ''
                 if (prependNotes) {
-                    update.notes = `${prependNotes}${hasNotes ? ' ' : ''}${tr.notes || ''}`
+                    newNotes = `${prependNotes}${hasNotes ? ' ' : ''}${newNotes || ''}`
                     hasNotes = true
                 }
                 if (appendNotes) {
-                    update.notes = `${update.notes || ''}${hasNotes ? ' ' : ''}${appendNotes}`
+                    newNotes = `${newNotes || ''}${hasNotes ? ' ' : ''}${appendNotes}`
                 }
+                update.notes = newNotes
             }
         }
 
