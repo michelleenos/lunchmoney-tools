@@ -24,5 +24,5 @@ interface PrintTagsOpts {
     sort?: boolean;
     showArchived?: boolean;
 }
-export declare const printTags: (tags: LMTag[], { showId, showDescription, sort, showArchived }?: PrintTagsOpts) => void;
+export declare const printTags: (tags: LMTag[], { showId, showDescription, sort, showArchived, }?: PrintTagsOpts) => void;
 export {};

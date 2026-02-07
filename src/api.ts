@@ -44,16 +44,16 @@ export class LunchMoneyApi {
         } catch (e) {
             throw new LMError(
                 `Missing Lunch Money API key. Please set the LM_API_KEY environment variable or pass the key to the LunchMoneyApi constructor.`,
-                'auth'
+                'auth',
             )
         }
     }
 
-    request = async <T extends object | number = { [key: string]: any }>(
+    async request<T extends object | number = { [key: string]: any }>(
         method: 'GET' | 'POST' | 'PUT' | 'DELETE',
         endpoint: string,
-        args: { [key: string]: any } = {}
-    ) => {
+        args: { [key: string]: any } = {},
+    ) {
         logger.info(`Lunch Money API request: ${method} ${endpoint}`)
         if (args) logger.verbose(`Request args: ${JSON.stringify(args, null, 2)}`)
         let res = await doRequest(
@@ -61,7 +61,7 @@ export class LunchMoneyApi {
             LM_URL,
             { Authorization: `Bearer ${this.apiKey}` },
             endpoint,
-            args
+            args,
         )
 
         let json = (await res.json()) as T | LunchMoneyErrorResponse
@@ -73,7 +73,7 @@ export class LunchMoneyApi {
                 throw new LMError(
                     `Error fetching Lunch Money API: ${res.status} ${
                         res.statusText
-                    } \n ${JSON.stringify(json, null, 2)}`
+                    } \n ${JSON.stringify(json, null, 2)}`,
                 )
             }
         }
@@ -90,7 +90,7 @@ export class LunchMoneyApi {
         return json as T
     }
 
-    getTransactions = async (query: LMTransactionsQuery = {}) => {
+    async getTransactions(query: LMTransactionsQuery = {}) {
         const q = { ...query }
         if (q.start_date && !q.end_date) {
             q.end_date = new Date().toISOString().split('T')[0]
@@ -98,26 +98,28 @@ export class LunchMoneyApi {
         const res = await this.request<{ transactions: LMTransaction[]; has_more?: boolean }>(
             'GET',
             `transactions`,
-            q
+            q,
         )
         logger.verbose(`Fetched ${res.transactions.length} transactions from Lunch Money.`)
         return res
     }
 
-    searchTransactions = (transactions: LMTransaction[], term: string) => {
+    searchTransactions(transactions: LMTransaction[], term: string) {
         const s = term.toLowerCase()
         return transactions.filter((t) => {
             return t.payee?.toLowerCase().includes(s) || t.notes?.toLowerCase().includes(s)
         })
     }
 
-    getTransaction = (id: number) => this.request<LMTransaction>('GET', `transactions/${id}`)
+    getTransaction(id: number) {
+        return this.request<LMTransaction>('GET', `transactions/${id}`)
+    }
 
-    updateTransaction = async (
+    async updateTransaction(
         id: number,
         transaction: LMUpdateTransactionExtra,
-        settings?: Omit<LMUpdateTransactionBody, 'transaction'>
-    ) => {
+        settings?: Omit<LMUpdateTransactionBody, 'transaction'>,
+    ) {
         logger.verbose(`Updating transaction ${id} with data:`, transaction)
 
         const { addTags, removeTags, appendNotes, prependNotes, ...update } = transaction
@@ -150,25 +152,25 @@ export class LunchMoneyApi {
         })
     }
 
-    unsplitTransactions = async (parentIds: number[], removeParents = false) => {
+    async unsplitTransactions(parentIds: number[], removeParents = false) {
         return this.request<number[]>('POST', 'transactions/unsplit', {
             parent_ids: parentIds,
             remove_parents: removeParents,
         })
     }
 
-    getTransactionGroup = async (id: number) => {
+    async getTransactionGroup(id: number) {
         return this.request<LMTransaction>('GET', `transactions/group/${id}`)
     }
 
-    deleteTransactionGroup = async (id: number) => {
+    async deleteTransactionGroup(id: number) {
         return this.request<{ transactions: number[] }>('DELETE', `transactions/group/${id}`)
     }
 
-    createTransactions = async (
+    async createTransactions(
         transactions: LMInsertTransactionObject[],
-        settings?: Omit<LMInsertTransactionsBody, 'transactions'>
-    ) => {
+        settings?: Omit<LMInsertTransactionsBody, 'transactions'>,
+    ) {
         logger.verbose(`Attempting to create ${transactions.length} LunchMoney transactions`)
         let res = await this.request<LMInsertTransactionsResponse>('POST', `transactions`, {
             transactions,
@@ -178,7 +180,7 @@ export class LunchMoneyApi {
         let createdCount = res.ids.length
         if (createdCount !== transactions.length) {
             logger.warn(
-                `Attempted to create ${transactions.length} transactions, but only ${createdCount} were created. There may have been duplicates.`
+                `Attempted to create ${transactions.length} transactions, but only ${createdCount} were created. There may have been duplicates.`,
             )
         }
         logger.verbose(`Created ${res.ids.length} transactions`)
@@ -186,24 +188,27 @@ export class LunchMoneyApi {
         return res
     }
 
-    getAssets = () => this.request<{ assets: LMAsset[] }>('GET', `assets`)
+    getAssets() {
+        return this.request<{ assets: LMAsset[] }>('GET', `assets`)
+    }
 
-    getPlaidAccounts = () =>
-        this.request<{ plaid_accounts: LMPlaidAccount[] }>('GET', `plaid_accounts`)
+    getPlaidAccounts() {
+        return this.request<{ plaid_accounts: LMPlaidAccount[] }>('GET', `plaid_accounts`)
+    }
 
-    getCategories = (format: 'flattened' | 'nested' = 'flattened') => {
+    getCategories(format: 'flattened' | 'nested' = 'flattened') {
         return this.request<{ categories: LMCategory[] }>('GET', `categories`, { format })
     }
 
-    createTransactionGroup = async (data: LMTransactionGroupCreate) => {
+    createTransactionGroup(data: LMTransactionGroupCreate) {
         return this.request<LMTransactionGroupCreateResponse>('POST', 'transactions/group', data)
     }
 
-    getCurrentUser = async () => {
+    getCurrentUser() {
         return this.request<LMUser>('GET', 'me')
     }
 
-    getTags = async ({ archived = true }: { archived?: boolean } = {}) => {
+    async getTags({ archived = true }: { archived?: boolean } = {}) {
         let res = await this.request<LMTag[]>('GET', 'tags')
         if (!archived) {
             res = res.filter((t) => !t.archived)

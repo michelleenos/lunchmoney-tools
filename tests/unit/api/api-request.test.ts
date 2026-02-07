@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { LunchMoneyApi } from '../../../src/api.ts'
-import { mockFetch } from '../test-utils.ts'
+import { mockFetch } from '../../test-utils.ts'
 
 global.fetch = vi.fn()
 

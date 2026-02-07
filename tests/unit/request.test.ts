@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
+import { LM_URL } from '../../src/api'
 import { doRequest } from '../../src/utils/request'
 import { mockFetch } from '../test-utils'
-import { LM_URL } from '../../src/api'
 
 global.fetch = vi.fn()
 

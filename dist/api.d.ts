@@ -11,36 +11,36 @@ export declare const LM_URL = "https://dev.lunchmoney.app/v1";
 export declare class LunchMoneyApi {
     apiKey: string;
     constructor(apiKey?: string);
-    request: <T extends object | number = {
+    request<T extends object | number = {
         [key: string]: any;
-    }>(method: "GET" | "POST" | "PUT" | "DELETE", endpoint: string, args?: {
+    }>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', endpoint: string, args?: {
         [key: string]: any;
-    }) => Promise<T>;
-    getTransactions: (query?: LMTransactionsQuery) => Promise<{
+    }): Promise<T>;
+    getTransactions(query?: LMTransactionsQuery): Promise<{
         transactions: LMTransaction[];
         has_more?: boolean;
     }>;
-    searchTransactions: (transactions: LMTransaction[], term: string) => LMTransaction[];
-    getTransaction: (id: number) => Promise<LMTransaction>;
-    updateTransaction: (id: number, transaction: LMUpdateTransactionExtra, settings?: Omit<LMUpdateTransactionBody, "transaction">) => Promise<LMUpdateTransactionResponse>;
-    unsplitTransactions: (parentIds: number[], removeParents?: boolean) => Promise<number[]>;
-    getTransactionGroup: (id: number) => Promise<LMTransaction>;
-    deleteTransactionGroup: (id: number) => Promise<{
+    searchTransactions(transactions: LMTransaction[], term: string): LMTransaction[];
+    getTransaction(id: number): Promise<LMTransaction>;
+    updateTransaction(id: number, transaction: LMUpdateTransactionExtra, settings?: Omit<LMUpdateTransactionBody, 'transaction'>): Promise<LMUpdateTransactionResponse>;
+    unsplitTransactions(parentIds: number[], removeParents?: boolean): Promise<number[]>;
+    getTransactionGroup(id: number): Promise<LMTransaction>;
+    deleteTransactionGroup(id: number): Promise<{
         transactions: number[];
     }>;
-    createTransactions: (transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, "transactions">) => Promise<LMInsertTransactionsResponse>;
-    getAssets: () => Promise<{
+    createTransactions(transactions: LMInsertTransactionObject[], settings?: Omit<LMInsertTransactionsBody, 'transactions'>): Promise<LMInsertTransactionsResponse>;
+    getAssets(): Promise<{
         assets: LMAsset[];
     }>;
-    getPlaidAccounts: () => Promise<{
+    getPlaidAccounts(): Promise<{
         plaid_accounts: LMPlaidAccount[];
     }>;
-    getCategories: (format?: "flattened" | "nested") => Promise<{
+    getCategories(format?: 'flattened' | 'nested'): Promise<{
         categories: LMCategory[];
     }>;
-    createTransactionGroup: (data: LMTransactionGroupCreate) => Promise<number>;
-    getCurrentUser: () => Promise<LMUser>;
-    getTags: ({ archived }?: {
+    createTransactionGroup(data: LMTransactionGroupCreate): Promise<number>;
+    getCurrentUser(): Promise<LMUser>;
+    getTags({ archived }?: {
         archived?: boolean;
-    }) => Promise<LMTag[]>;
+    }): Promise<LMTag[]>;
 }

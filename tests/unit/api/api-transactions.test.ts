@@ -1,19 +1,55 @@
 import { describe, expect, vi, test, beforeEach, Mock } from 'vitest'
-import { mockFetch } from '../test-utils'
+import { mockFetch } from '../../test-utils.ts'
 import { LM_URL, LunchMoneyApi } from '../../../src/api'
-import transactionFixtures from '../../fixtures/lunchmoney/transactions.json'
 import { LMTransaction } from '../../../src/types/transactions/base'
 
 global.fetch = vi.fn()
 
+const transactions = [
+    {
+        id: 12345,
+        date: '2025-01-15',
+        payee: 'Test Coffee Shop',
+        amount: '4.50',
+        tags: [
+            { id: 1, name: 'test-tag' },
+            { id: 2, name: 'cafe' },
+        ],
+        notes: 'Morning coffee',
+    },
+    {
+        id: 23456,
+        date: '2025-04-07',
+        amount: '17.0000',
+        payee: 'Water Bill',
+    },
+    {
+        id: 45678,
+        date: '2025-04-07',
+        amount: '39.2900',
+        payee: 'Electricity',
+        notes: 'Electricity Bill',
+    },
+    {
+        id: 456,
+        date: '2025-06-07',
+        payee: 'Groceries',
+        amount: '25.0000',
+        tags: [{ id: 1, name: 'test-tag' }],
+        notes: 'bread, cereal, and blueberries',
+    },
+]
+
 describe('LunchMoneyApi transactions', () => {
     let api: LunchMoneyApi
+    beforeEach(() => {
+        vi.clearAllMocks()
+        api = new LunchMoneyApi('test-api-key')
+    })
 
     describe('Fetch transactions', () => {
         beforeEach(() => {
-            vi.clearAllMocks()
-            api = new LunchMoneyApi('test-api-key')
-            mockFetch({ transactions: transactionFixtures, has_more: false })
+            mockFetch({ transactions, has_more: false })
         })
 
         test('should return fetched transactions', async () => {
@@ -40,18 +76,19 @@ describe('LunchMoneyApi transactions', () => {
     })
 
     test('Search transactions', async () => {
-        let transactions = transactionFixtures as LMTransaction[]
-        const notesSearch = api.searchTransactions(transactions, 'blueberries')
+        let trs = transactions as unknown as LMTransaction[]
+        // let transactions = transactions as LMTransaction[]
+        const notesSearch = api.searchTransactions(trs, 'blueberries')
 
         expect(notesSearch.length).toBe(1)
         expect(notesSearch[0].payee).toBe('Groceries')
 
-        const nameSearch = api.searchTransactions(transactions, 'groceries')
+        const nameSearch = api.searchTransactions(trs, 'groceries')
         expect(nameSearch.length).toBe(1)
         expect(nameSearch[0].payee).toBe('Groceries')
 
         // "Water Bill" and "Electricity Bill"
-        const billSearch = api.searchTransactions(transactions, 'bill')
+        const billSearch = api.searchTransactions(trs, 'bill')
         expect(billSearch.length).toBe(2)
     })
 
@@ -75,7 +112,7 @@ describe('LunchMoneyApi transactions', () => {
         })
 
         describe('update transaction tags', () => {
-            const transaction = transactionFixtures[0]
+            const transaction = transactions[0]
             let getFn: Mock
             let reqFn: Mock
             beforeEach(() => {
@@ -141,7 +178,7 @@ describe('LunchMoneyApi transactions', () => {
         })
 
         describe('update transaction notes', async () => {
-            const transaction = transactionFixtures[0]
+            const transaction = transactions[0]
 
             beforeEach(() => {
                 vi.clearAllMocks()

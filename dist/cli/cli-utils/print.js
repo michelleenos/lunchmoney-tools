@@ -99,7 +99,7 @@ export const printCategories = (cats, { isNested = true, showDescription = true,
     });
     t.printTable();
 };
-export const printTags = (tags, { showId = true, showDescription = true, sort = false, showArchived = true } = {}) => {
+export const printTags = (tags, { showId = true, showDescription = true, sort = false, showArchived = true, } = {}) => {
     let columns = [
         showId && { name: 'id' },
         { name: 'name', alignment: 'left' },
@@ -117,7 +117,7 @@ export const printTags = (tags, { showId = true, showDescription = true, sort = 
             name: display(tag.name, 0),
             description: display(tag.description, 0),
             archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
-        });
+        }, { color: tag.archived ? 'gray' : 'white' });
     });
     t.printTable();
 };
