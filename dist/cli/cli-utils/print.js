@@ -4,7 +4,8 @@ import { display, money } from "./write-stuff.js";
 export const printTransactions = (transactions, { id = true, date = true, payee = true, amount = true, tags = false, category = true, account = true, notes = false, externalId = false, } = {}) => {
     const p = new Table({
         colorMap: {
-            gray: `\x1b[38;5;${colors['Grey7'].code}m`,
+            gray: `\x1b[38;5;${colors['Grey50'].code}m`,
+            wheat: `\x1b[38;5;${colors['Wheat1'].code}m`,
         },
     });
     if (id)
@@ -25,20 +26,43 @@ export const printTransactions = (transactions, { id = true, date = true, payee 
         p.addColumn({ name: 'notes', alignment: 'left' });
     if (externalId)
         p.addColumn({ name: 'external_id', alignment: 'left' });
+    // p.addColumn({ name: 'extra', title: '' })
+    let hasExtraCol = false;
     transactions.forEach((t) => {
         let amt = Number(t.amount);
         let exclude = t.exclude_from_totals;
-        let color = exclude ? 'gray' : amt < 0 ? 'green' : undefined;
+        let color = exclude ? 'gray' : amt < 0 ? 'green' : 'white';
+        let isGroup = t.is_group;
+        let isInGroup = t.group_id;
+        let isSplit = t.parent_id;
         const row = {};
+        if (isInGroup || isSplit) {
+            if (!hasExtraCol) {
+                p.addColumn({ name: 'extra', title: '', color: 'wheat' });
+                hasExtraCol = true;
+            }
+            let extra = '';
+            if (isInGroup)
+                extra = `group_id: ${t.group_id}`;
+            if (isSplit)
+                extra = `${extra.length > 0 ? extra + ' | ' : ''}parent_id: ${t.parent_id}`;
+            row.extra = extra;
+        }
         if (id)
             row.id = t.id;
         if (date)
             row.date = t.date;
         if (payee) {
-            row.payee = display(t.payee || 'Unknown');
-            if (t.recurring_payee) {
-                row.payee = `🔄 ${row.payee}`;
-            }
+            let fullPayee = t.payee || 'Unknown';
+            if (isGroup)
+                fullPayee = `(GROUP) ${fullPayee}`;
+            if (isSplit)
+                fullPayee = `(SPLIT) ${fullPayee}`;
+            if (isInGroup)
+                fullPayee = `(GROUP MEMBER) ${fullPayee}`;
+            if (t.recurring_payee)
+                fullPayee = `🔄 ${fullPayee}`;
+            row.payee = display(fullPayee);
         }
         if (amount)
             row.amount = money(t.amount);
@@ -110,6 +134,10 @@ export const printTags = (tags, { showId = true, showDescription = true, sort = 
         columns,
         enabledColumns: columns.map((c) => c.name),
         sort: sort ? (a, b) => a.name.localeCompare(b.name) : undefined,
+        colorMap: {
+            gray: `\x1b[38;5;${colors['Grey50'].code}m`,
+            wheat: `\x1b[38;5;${colors['Wheat1'].code}m`,
+        },
     });
     tags.forEach((tag) => {
         t.addRow({
@@ -117,7 +145,9 @@ export const printTags = (tags, { showId = true, showDescription = true, sort = 
             name: display(tag.name, 0),
             description: display(tag.description, 0),
             archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
-        }, { color: tag.archived ? 'gray' : 'white' });
+        }, {
+            color: tag.archived ? 'gray' : 'white',
+        });
     });
     t.printTable();
 };

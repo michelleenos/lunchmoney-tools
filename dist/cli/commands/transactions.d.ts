@@ -7,6 +7,8 @@ export declare const getTransactionsCommand: () => Command<[], {
     asset?: number | undefined;
     plaid?: number | undefined;
     reviewed?: boolean | undefined;
+    limit?: number | undefined;
+    offset?: number | undefined;
     search?: string | undefined;
     showExtId?: true | undefined;
     showTags?: true | undefined;

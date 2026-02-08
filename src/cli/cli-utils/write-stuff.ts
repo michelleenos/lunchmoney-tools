@@ -4,7 +4,7 @@ import { decode } from 'html-entities'
  * @param {number} [len=40] - Max length of the returned string. Set to 0 for no limit. (default is 40)
  * @returns A formatted string, possibly shortened to the specified length, or empty if `text` input is undefined.
  */
-export const display = (text?: string, len = 40) => {
+export const display = (text?: string, len: number = 40) => {
     if (!text) return ''
     text = text.trim()
     text = decode(text)

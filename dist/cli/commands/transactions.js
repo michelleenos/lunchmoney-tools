@@ -18,6 +18,8 @@ export const getTransactionsCommand = () => {
         .option('-p, --plaid <number>', 'Filter transactions by Plaid account ID', parseInt)
         .option('-r, --reviewed', 'only return reviewed transactions')
         .option('-u, --no-reviewed', 'only return unreviewed transactions')
+        .option('-l, --limit <number>', 'Limit number of transactions returned (default 1000)', parseInt)
+        .option('-o, --offset <number>', 'Offset', parseInt)
         .option('--search <string>', 'Search transactions by payee')
         .option('--show-ext-id', 'Display transaction external ID in output')
         .option('--show-tags', 'Display transaction tags in output')
@@ -39,13 +41,22 @@ export const getTransactionsCommand = () => {
             category_id: opts.catId,
             tag_id: opts.tagId,
             plaid_account_id: opts.plaid,
+            limit: opts.limit,
+            offset: opts.offset,
             status: opts.reviewed === false
                 ? 'uncleared'
                 : opts.reviewed === true
                     ? 'cleared'
                     : undefined,
         });
-        let transactions = res.transactions;
+        let { transactions, has_more: hasMore } = res;
+        if (hasMore) {
+            logger.warn('has_more is true! run the same command with an offset to get the next batch. This time you ' +
+                opts.offset
+                ? `used an offset of ${opts.offset}, `
+                : 'did not use an offset, ' +
+                    `and ${transactions.length} transactions were returned from the API.`);
+        }
         if (search) {
             logger.verbose(`Retrieved ${transactions.length} transactions before search. Searching "${search}"`);
             transactions = lm.searchTransactions(transactions, search);

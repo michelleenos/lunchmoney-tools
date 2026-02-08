@@ -1,0 +1,1 @@
+- [ ] splitwise-to-lm: warn user if they haven't provided a start date (by default will fetch SW transactions indefinitely but not LM)

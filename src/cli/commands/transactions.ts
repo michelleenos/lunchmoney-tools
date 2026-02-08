@@ -22,6 +22,12 @@ export const getTransactionsCommand = () => {
         .option('-p, --plaid <number>', 'Filter transactions by Plaid account ID', parseInt)
         .option('-r, --reviewed', 'only return reviewed transactions')
         .option('-u, --no-reviewed', 'only return unreviewed transactions')
+        .option(
+            '-l, --limit <number>',
+            'Limit number of transactions returned (default 1000)',
+            parseInt,
+        )
+        .option('-o, --offset <number>', 'Offset', parseInt)
         .option('--search <string>', 'Search transactions by payee')
         .option('--show-ext-id', 'Display transaction external ID in output')
         .option('--show-tags', 'Display transaction tags in output')
@@ -31,7 +37,7 @@ export const getTransactionsCommand = () => {
         .option('--no-show-id', 'Do not display transaction IDs in output')
         .option(
             '--write-file [directory]',
-            'Write transactions to a json file instead of printing to console'
+            'Write transactions to a json file instead of printing to console',
         )
         .action(
             programWrapper(async (_options, command) => {
@@ -48,19 +54,31 @@ export const getTransactionsCommand = () => {
                     category_id: opts.catId,
                     tag_id: opts.tagId,
                     plaid_account_id: opts.plaid,
+                    limit: opts.limit,
+                    offset: opts.offset,
                     status:
                         opts.reviewed === false
                             ? 'uncleared'
                             : opts.reviewed === true
-                            ? 'cleared'
-                            : undefined,
+                              ? 'cleared'
+                              : undefined,
                 })
 
-                let transactions = res.transactions
+                let { transactions, has_more: hasMore } = res
+
+                if (hasMore) {
+                    logger.warn(
+                        'has_more is true! run the same command with an offset to get the next batch. This time you ' +
+                            opts.offset
+                            ? `used an offset of ${opts.offset}, `
+                            : 'did not use an offset, ' +
+                                  `and ${transactions.length} transactions were returned from the API.`,
+                    )
+                }
 
                 if (search) {
                     logger.verbose(
-                        `Retrieved ${transactions.length} transactions before search. Searching "${search}"`
+                        `Retrieved ${transactions.length} transactions before search. Searching "${search}"`,
                     )
                     transactions = lm.searchTransactions(transactions, search)
                     logger.info(`Found ${transactions.length} transactions matching "${search}"`)
@@ -84,7 +102,7 @@ export const getTransactionsCommand = () => {
                         externalId: opts.showExtId,
                     })
                 }
-            })
+            }),
         )
 }
 
@@ -102,7 +120,7 @@ export const getTransactionCommand = () => {
         .option('--show-notes', 'Show transaction notes')
         .option(
             '--write-file [directory]',
-            'Write transaction to a json file instead of printing to console'
+            'Write transaction to a json file instead of printing to console',
         )
         .action(
             programWrapper(async (id, _opts, command) => {
@@ -131,7 +149,7 @@ export const getTransactionCommand = () => {
                     notes: opts.showNotes,
                     externalId: opts.showExtId,
                 })
-            })
+            }),
         )
 }
 
@@ -174,6 +192,6 @@ export const updateTransactionCommand = () => {
                 } else {
                     logger.error(`Failed to update transaction ${id}`)
                 }
-            })
+            }),
         )
 }

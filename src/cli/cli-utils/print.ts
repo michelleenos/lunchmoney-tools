@@ -27,11 +27,12 @@ export const printTransactions = (
         account = true,
         notes = false,
         externalId = false,
-    }: PrintTransactionShow = {}
+    }: PrintTransactionShow = {},
 ) => {
     const p = new Table({
         colorMap: {
-            gray: `\x1b[38;5;${colors['Grey7'].code}m`,
+            gray: `\x1b[38;5;${colors['Grey50'].code}m`,
+            wheat: `\x1b[38;5;${colors['Wheat1'].code}m`,
         },
     })
 
@@ -45,19 +46,37 @@ export const printTransactions = (
     if (notes) p.addColumn({ name: 'notes', alignment: 'left' })
     if (externalId) p.addColumn({ name: 'external_id', alignment: 'left' })
 
+    // p.addColumn({ name: 'extra', title: '' })
+    let hasExtraCol = false
+
     transactions.forEach((t) => {
         let amt = Number(t.amount)
         let exclude = t.exclude_from_totals
-        let color = exclude ? 'gray' : amt < 0 ? 'green' : undefined
+        let color = exclude ? 'gray' : amt < 0 ? 'green' : 'white'
+        let isGroup = t.is_group
+        let isInGroup = t.group_id
+        let isSplit = t.parent_id
 
         const row: { [key: string]: string | number | undefined } = {}
+        if (isInGroup || isSplit) {
+            if (!hasExtraCol) {
+                p.addColumn({ name: 'extra', title: '', color: 'wheat' })
+                hasExtraCol = true
+            }
+            let extra = ''
+            if (isInGroup) extra = `group_id: ${t.group_id}`
+            if (isSplit) extra = `${extra.length > 0 ? extra + ' | ' : ''}parent_id: ${t.parent_id}`
+            row.extra = extra
+        }
         if (id) row.id = t.id
         if (date) row.date = t.date
         if (payee) {
-            row.payee = display(t.payee || 'Unknown')
-            if (t.recurring_payee) {
-                row.payee = `🔄 ${row.payee}`
-            }
+            let fullPayee = t.payee || 'Unknown'
+            if (isGroup) fullPayee = `(GROUP) ${fullPayee}`
+            if (isSplit) fullPayee = `(SPLIT) ${fullPayee}`
+            if (isInGroup) fullPayee = `(GROUP MEMBER) ${fullPayee}`
+            if (t.recurring_payee) fullPayee = `🔄 ${fullPayee}`
+            row.payee = display(fullPayee)
         }
         if (amount) row.amount = money(t.amount)
         if (tags) row.tags = t.tags.map((tag) => tag.name).join(', ')
@@ -91,7 +110,7 @@ export const printAccounts = (accounts: (LMAsset | LMPlaidAccount)[]) => {
         {
             enabledColumns: ['id', 'name', 'balance', 'institution'],
             columns: [{ name: 'id' }, { name: 'name', maxLen: 40 }],
-        }
+        },
     )
 }
 
@@ -102,7 +121,7 @@ interface PrintCategoriesOpts {
 }
 export const printCategories = (
     cats: LMCategory[],
-    { isNested = true, showDescription = true, showId = true }: PrintCategoriesOpts = {}
+    { isNested = true, showDescription = true, showId = true }: PrintCategoriesOpts = {},
 ) => {
     let columns = [
         showId && { name: 'id', color: 'white' },
@@ -121,7 +140,7 @@ export const printCategories = (
 
         t.addRow(
             { id: c.id, name, description: display(c.description, 0) },
-            { color: isNested ? 'green' : 'white' }
+            { color: isNested ? 'green' : 'white' },
         )
 
         if (c.children && isNested) {
@@ -134,7 +153,7 @@ export const printCategories = (
                         name: `   ${child.name}`,
                         description: display(child.description, 0),
                     },
-                    { separator: i === count - 1 ? true : false }
+                    { separator: i === count - 1 ? true : false },
                 )
             })
         }
@@ -151,7 +170,12 @@ interface PrintTagsOpts {
 }
 export const printTags = (
     tags: LMTag[],
-    { showId = true, showDescription = true, sort = false, showArchived = true }: PrintTagsOpts = {}
+    {
+        showId = true,
+        showDescription = true,
+        sort = false,
+        showArchived = true,
+    }: PrintTagsOpts = {},
 ) => {
     let columns = [
         showId && { name: 'id' },
@@ -164,15 +188,24 @@ export const printTags = (
         columns,
         enabledColumns: columns.map((c) => c.name),
         sort: sort ? (a, b) => a.name.localeCompare(b.name) : undefined,
+        colorMap: {
+            gray: `\x1b[38;5;${colors['Grey50'].code}m`,
+            wheat: `\x1b[38;5;${colors['Wheat1'].code}m`,
+        },
     })
 
     tags.forEach((tag) => {
-        t.addRow({
-            id: tag.id,
-            name: display(tag.name, 0),
-            description: display(tag.description, 0),
-            archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
-        })
+        t.addRow(
+            {
+                id: tag.id,
+                name: display(tag.name, 0),
+                description: display(tag.description, 0),
+                archived: showArchived ? (tag.archived ? 'yes' : 'no') : undefined,
+            },
+            {
+                color: tag.archived ? 'gray' : 'white',
+            },
+        )
     })
 
     t.printTable()

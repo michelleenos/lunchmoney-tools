@@ -101,7 +101,7 @@ export interface LMTransaction {
     external_id?: string;
     is_group: boolean;
     /**
-     * If it's a group, this is the ID of the group
+     * If it's in a group, this is the ID of the group
      */
     group_id?: number;
     children?: Pick<LMTransaction, 'id' | 'date' | 'amount' | 'payee' | 'notes' | 'asset_id' | 'plaid_account_id'>[];
