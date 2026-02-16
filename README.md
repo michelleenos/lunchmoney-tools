@@ -6,19 +6,22 @@ I needed a way to manage transactions programatically, particularly for importin
 
 ## Contents
 
--   [Features](#-features)
--   [Environment Setup](#environment-setup)
--   [CLI Usage](#cli-usage)
-    -   [List of Commands](#list-of-commands)
-    -   [Transactions](#transactions)
-    -   [Accounts](#accounts)
-    -   [Categories / Tags](#categories--tags)
-    -   [Splitwise Integration](#splitwise-integration)
--   [API Reference](#api-reference)
-    -   [LunchMoneyApi](#lunchmoneyapi)
-    -   [Type Definitions](#type-definitions)
-    -   [API Examples](#api-examples)
--   [License](#license)
+- [✨ Features](#-features)
+- [CLI Installation](#cli-installation)
+  - [Option 1: Install from npm](#option-1-install-from-npm)
+  - [Option 2: Install from local directory (for development)](#option-2-install-from-local-directory-for-development)
+- [Environment Setup](#environment-setup)
+- [CLI Usage](#cli-usage)
+  - [List of Commands](#list-of-commands)
+  - [Transactions](#transactions)
+  - [Accounts](#accounts)
+  - [Categories / Tags](#categories--tags)
+  - [Splitwise Integration](#splitwise-integration)
+- [API Reference](#api-reference)
+  - [`LunchMoneyApi`](#lunchmoneyapi)
+  - [Type Definitions](#type-definitions)
+  - [API Examples](#api-examples)
+- [License](#license)
 
 ## ✨ Features
 
@@ -27,6 +30,38 @@ I needed a way to manage transactions programatically, particularly for importin
 -   🎨 **Console Output** - Colorized and formatted tables for data display
 -   💾 **Data Export** - Option to export data to JSON files
 -   🔄 **Splitwise integration** - Tools for importing expenses from Splitwise to Lunch Money
+
+## CLI Installation
+
+You can install the command line tool directly from npm, or clone this repo and run it locally
+
+### Option 1: Install from npm
+```bash
+npm install -g lunchmoney-tools
+```
+
+### Option 2: Install from local directory (for development)
+```bash
+# Clone the repository
+git clone https://github.com/michelleenos/lunchmoney-tools.git
+cd lunchmoney-tools
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Install globally from local directory
+npm install -g .
+```
+
+After installation, you can run `lm-tools` from anywhere in your terminal.
+
+Alternatively, you can run the cli as a node app directly from your project:
+```bash
+node dist/cli/index.js
+```
 
 ## Environment Setup
 
