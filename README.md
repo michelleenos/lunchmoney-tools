@@ -31,17 +31,40 @@ I needed a way to manage transactions programatically, particularly for importin
 - 💾 **Data Export** - Option to export data to JSON files
 - 🔄 **Splitwise integration** - Tools for importing expenses from Splitwise to Lunch Money
 
-## CLI Installation
+## Installation
 
-You can install the command line tool directly from npm, or clone this repo and run it locally
+You can install the command line tool directly from npm, or clone this repo and run it locally:
 
-### Option 1: Install from npm
+### Option 1: Install from npm to local project
 
 ```bash
-npm install -g lunchmoney-tools
+## pnpm
+pnpm add lunchmoney-tools
+## npm
+npm install lunchmoney-tools
 ```
 
-### Option 2: Install from local directory (for development)
+You can now use the APIs and functions in your project code. You can also use the CLI inside your project directory via:
+
+```bash
+## pnpm
+pnpm lm-tools
+## npm
+npm exec lm-tools
+```
+
+### Option 2: Install from npm globally
+
+```bash
+## npm
+npm install -g lunchmoney-tools
+## pnpm
+pnpm install -g lunchmoney-tools
+```
+
+After installation, you will be able to run `lm-tools` from anywhere in your terminal.
+
+### Option 3: Install from local directory (for development)
 
 ```bash
 # Clone the repository
@@ -58,9 +81,7 @@ npm run build
 npm install -g .
 ```
 
-After installation, you can run `lm-tools` from anywhere in your terminal.
-
-Alternatively, you can run the cli as a node app directly from your project:
+You can now run `lm-tools` from anywhere in your terminal. Alternatively, you can run the cli as a node app directly from the project:
 
 ```bash
 node dist/cli/index.js
@@ -68,7 +89,7 @@ node dist/cli/index.js
 
 ## Environment Setup
 
-All environment variables can be provided via CLI or to the API client directly, but it's recommended to set them as environment variables for convenience. To do so, create an `.env` file in your project root and include:
+All environment variables can be provided via CLI or to the API client directly, but you can also set them as environment variables for convenience. To do so, create an `.env` file in your project root and include:
 
 ```env
 LM_API_KEY=[YOURKEY]
