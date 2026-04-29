@@ -1,13 +1,56 @@
 import { Table } from 'console-table-printer'
 import { LunchMoneyApi } from '../api.ts'
 import { getLogger } from '../cli/cli-utils/logger.ts'
-import { LMTransaction, LMUpdateTransactionObject } from '../types/index.ts'
-import { SplitwiseApi } from './splitwise-api.ts'
 import { display, money } from '../cli/cli-utils/write-stuff.ts'
-import { splitUnevenlyQuery } from './utils.ts'
-import { SplitwiseExpenseCreate, SplitwiseExpenseCreateResponse } from './types.ts'
+import { LMTransaction } from '../types/index.ts'
+import { SplitwiseApi } from './splitwise-api.ts'
+import { SplitwiseExpenseCreate } from './types.ts'
 
 const logger = getLogger()
+
+const skipWarning = (t: LMTransaction, reason: string) => {
+    logger.warn(`Skipping transaction ${t.payee || 'unknown'} (${t.id}) - ${reason}.`)
+}
+
+const getSwCreateObject = (
+    t: LMTransaction,
+    sw: SplitwiseApi,
+    unequalShares?: { id: number; percent: number }[],
+) => {
+    const amt = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount
+    const tName = t.payee || `Transaction ${t.id}`
+    const createObjectInit = { description: tName, date: t.date, cost: amt.toFixed(2) }
+
+    let createObject = unequalShares
+        ? sw.getExpenseCreateObject(createObjectInit, unequalShares)
+        : sw.getExpenseCreateObject(createObjectInit)
+
+    return createObject
+}
+
+async function attemptSplitwiseImport(
+    tr: LMTransaction,
+    sw: SplitwiseApi,
+    unequalShares?: { id: number; percent: number }[],
+) {
+    const createObject = getSwCreateObject(tr, sw, unequalShares)
+    const res = await sw.createGroupExpense(createObject)
+
+    const { expenses } = res
+
+    if (!res.expenses || res.expenses.length === 0) {
+        logger.error(
+            `lmToSplitwise: Failed to import transaction ${tr.payee} (${tr.id}) to Splitwise`,
+        )
+        return false
+    } else {
+        logger.verbose(
+            `lmToSplitwise: Imported transaction ${tr.payee} (${tr.id}) - ID: ${expenses[0].id}`,
+        )
+    }
+
+    return expenses[0]
+}
 
 interface LMToSplitwiseOpts {
     lmApiKey?: string
@@ -88,7 +131,7 @@ export const lmToSplitwise = async ({
                 amount: money(tr.amount),
                 date: tr.date,
                 reason,
-            }))
+            })),
         )
 
         let output = t.render()
@@ -125,32 +168,58 @@ export const lmToSplitwise = async ({
     }
 
     let importedLen = 0
-    let updatedLen = 0
+    let unimportedTransactions: LMTransaction[] = []
+    let notUpdatedTransactions: LMTransaction[] = []
     for (const t of items) {
         const { imported, lmUpdated } = await lmToSplitwiseItem(t, lm, sw, {
             unequalShares,
             addTag,
             removeTag: removeTag ? tagId : undefined,
         })
-        if (imported) importedLen++
-        if (lmUpdated) updatedLen++
+        if (!imported) {
+            unimportedTransactions.push(t)
+        } else {
+            importedLen++
+            if (!lmUpdated) {
+                notUpdatedTransactions.push(t)
+            }
+        }
     }
 
     logger.info(`lmToSplitwise: Imported ${importedLen} transactions to Splitwise`)
-    if (importedLen < items.length) {
-        let diff = items.length - importedLen
-        logger.warn(`lmToSplitwise: ${diff} transactions were not imported to Splitwise`)
-    }
-    if (updatedLen < importedLen) {
-        let diff = importedLen - updatedLen
-        logger.warn(
-            `lmToSplitwise: ${diff} transactions were imported to Splitwise but not updated in Lunch Money`
+    if (unimportedTransactions.length > 0) {
+        let t = new Table()
+        t.addRows(
+            unimportedTransactions.map((tr) => ({
+                id: tr.id,
+                payee: display(tr.payee, 40),
+                date: tr.date,
+                amount: money(tr.amount),
+            })),
         )
+        let output = t.render()
+        logger.warn(
+            `lmToSplitwise: ${unimportedTransactions.length} transactions were not imported to Splitwise: `,
+        )
+        console.log(output)
     }
-}
+    if (notUpdatedTransactions.length > 0) {
+        let t = new Table()
+        t.addRows(
+            notUpdatedTransactions.map((tr) => ({
+                id: tr.id,
+                payee: display(tr.payee, 40),
+                date: tr.date,
+                amount: money(tr.amount),
+            })),
+        )
+        let output = t.render()
 
-const skipWarning = (t: LMTransaction, reason: string) => {
-    logger.warn(`Skipping transaction ${t.payee || 'unknown'} (${t.id}) - ${reason}.`)
+        logger.warn(
+            `lmToSplitwise: ${notUpdatedTransactions.length} transactions were imported to Splitwise but not updated in Lunch Money:`,
+        )
+        console.log(output)
+    }
 }
 
 interface LMToSplitwiseItemOpts {
@@ -162,7 +231,7 @@ const lmToSplitwiseItem = async (
     t: LMTransaction,
     lm: LunchMoneyApi,
     sw: SplitwiseApi,
-    { unequalShares, addTag = 'splitwise-auto-added', removeTag }: LMToSplitwiseItemOpts
+    { unequalShares, addTag = 'splitwise-auto-added', removeTag }: LMToSplitwiseItemOpts,
 ) => {
     const createObject = getSwCreateObject(t, sw, unequalShares)
     const amt = createObject.cost
@@ -170,31 +239,30 @@ const lmToSplitwiseItem = async (
     const curNotes = t.notes || ''
 
     let res = await sw.createGroupExpense(createObject)
+    const { expenses } = res
 
     if (!res.expenses || res.expenses.length === 0) {
         logger.error(
-            `lmToSplitwiseItem: Failed to import transaction ${tName} (${t.id}) to Splitwise`
+            `lmToSplitwiseItem: Failed to import transaction ${tName} (${t.id}) to Splitwise`,
         )
         return { imported: false, lmUpdated: false }
     } else {
         logger.info(
-            `lmToSplitwiseItem: Imported transaction ${tName} (${t.id}) - ID: ${res.expenses[0].id}`
+            `lmToSplitwiseItem: Imported transaction ${tName} (${t.id}) - ID: ${res.expenses[0].id}`,
         )
     }
 
-    let user = res.expenses[0].users.find((u) => u.user_id === sw.userId)
+    let user = expenses[0].users.find((u) => u.user_id === sw.userId)
     let userShare = user ? user.owed_share : null
     if (!userShare) {
         logger.error(
-            `lmToSplitwiseItem: Can't determine user share for transaction ${tName} (${t.id})`
+            `lmToSplitwiseItem: Can't determine user share for transaction ${tName} (${t.id}); cannot update in Lunch Money.`,
         )
         return { imported: true, lmUpdated: false }
     }
 
     let newTags = t.tags?.filter((tag) => tag.id !== removeTag).map((tag) => tag.name) || []
-    if (addTag && !newTags.includes(addTag)) {
-        newTags.push(addTag)
-    }
+    if (addTag && !newTags.includes(addTag)) newTags.push(addTag)
 
     const updateRes = await lm.updateTransaction(t.id, {
         tags: newTags,
@@ -204,30 +272,106 @@ const lmToSplitwiseItem = async (
 
     if (updateRes && 'updated' in updateRes) {
         logger.info(
-            `lmToSplitwiseItem: Updated Lunch Money transaction ${tName} (ID: ${t.id}) with new amount ${userShare}`
+            `lmToSplitwiseItem: Updated Lunch Money transaction ${tName} (ID: ${t.id}) with new amount ${userShare}`,
         )
 
         return { imported: true, lmUpdated: true }
     }
 
     logger.error(
-        `lmToSplitwiseItem: Failed to update Lunch Money transaction ${tName} (ID: ${t.id})`
+        `lmToSplitwiseItem: Failed to update Lunch Money transaction ${tName} (ID: ${t.id})`,
     )
     return { imported: true, lmUpdated: false }
 }
 
-const getSwCreateObject = (
-    t: LMTransaction,
-    sw: SplitwiseApi,
+interface LMGroupItemToSplitwiseOpts {
+    id: number
+    lmApiKey?: string
+    swApiKey?: string
+    swGroupId?: number
+    removeTag?: string
+    addTag?: string
     unequalShares?: { id: number; percent: number }[]
-) => {
-    const amt = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount
-    const tName = t.payee || `Transaction ${t.id}`
-    const createObjectInit = { description: tName, date: t.date, cost: amt.toFixed(2) }
+}
+export async function lmGroupToSplitwise({
+    id,
+    lmApiKey,
+    swApiKey,
+    swGroupId,
+    unequalShares,
+    addTag = 'splitwise-auto-added',
+    removeTag,
+}: LMGroupItemToSplitwiseOpts) {
+    const lm = new LunchMoneyApi(lmApiKey)
+    const sw = await new SplitwiseApi(swApiKey, swGroupId).init()
 
-    let createObject = unequalShares
-        ? sw.getExpenseCreateObject(createObjectInit, unequalShares)
-        : sw.getExpenseCreateObject(createObjectInit)
+    const tr = await lm.getTransaction(id)
 
-    return createObject
+    if (!tr.children) {
+        logger.error(`lmGroupToSplitwise: Transaction with ID ${tr.id} is not a group`)
+        return
+    }
+
+    const groupDate = tr.date
+    const originalAmount = +tr.amount
+
+    const swExpense = await attemptSplitwiseImport(tr, sw, unequalShares)
+    if (swExpense === false) return false
+
+    logger.info(
+        `lmGroupToSplitwise: Imported transaction ${tr.payee} - Splitwise ID: ${swExpense.id}`,
+    )
+
+    const user = swExpense.users.find((u) => u.user_id === sw.userId)
+    const userShare = user ? +user.owed_share : null
+
+    if (!userShare) {
+        logger.error(
+            `lmToSplitwise: Imported group transaction ${tr.payee} to Splitwise, but can't determine user share to make updates in LM.`,
+        )
+        return false
+    }
+
+    const amountToAdd = originalAmount - userShare
+    const groupNotes = tr.notes
+
+    const lmDeleteRes = await lm.deleteTransactionGroup(tr.id)
+    const childIds = lmDeleteRes.transactions
+
+    const reimbursement = await lm.createTransactions([
+        {
+            amount: -amountToAdd,
+            date: groupDate,
+            asset_id: tr.asset_id,
+            payee: `SPLIT GROUP REIMBURSEMENT: ${tr.payee || `transaction ${groupDate}`}`,
+        },
+    ])
+    const reimbId = reimbursement.ids[0]
+
+    const newGroupId = await lm.createTransactionGroup({
+        date: groupDate,
+        payee: tr.payee || '',
+        transactions: [reimbId, ...childIds],
+        category_id: tr.category_id,
+        notes: `${originalAmount}-SPLIT${groupNotes ? ` | ${groupNotes}` : ''}`,
+        tags: tr.tags.map((tag) => tag.id),
+    })
+
+    logger.info(
+        `lmGroupToSplitwise: Created new Lunch Money transaction group ${tr.payee}. New ID: ${newGroupId}`,
+    )
+
+    const updateRes = await lm.updateTransaction(newGroupId, {
+        addTags: [addTag],
+        removeTags: removeTag ? [removeTag] : undefined,
+    })
+    if (!('updated' in updateRes)) {
+        logger.error(
+            `lmGroupToSplitwise: Failed to update tags in newly created group ${tr.payee} (ID: ${newGroupId})`,
+        )
+    }
+
+    logger.info(`lmGroupToSplitwise: Updated tags in LM Group.`)
+
+    return true
 }

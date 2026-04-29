@@ -54,7 +54,7 @@ export class LunchMoneyApi {
         endpoint: string,
         args: { [key: string]: any } = {},
     ) {
-        logger.info(`Lunch Money API request: ${method} ${endpoint}`)
+        logger.verbose(`Lunch Money API request: ${method} ${endpoint}`)
         if (args) logger.verbose(`Request args: ${JSON.stringify(args, null, 2)}`)
         let res = await doRequest(
             method,

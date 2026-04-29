@@ -1,6 +1,6 @@
 import { Command } from '@commander-js/extra-typings';
 import { printTable } from 'console-table-printer';
-import { lmToSplitwise } from "../../splitwise/lm-to-splitwise.js";
+import { lmGroupToSplitwise, lmToSplitwise } from "../../splitwise/lm-to-splitwise.js";
 import { SplitwiseApi } from "../../splitwise/splitwise-api.js";
 import { splitwiseToLMWithUpdates } from "../../splitwise/splitwise-to-lm.js";
 import { LMError } from "../../utils/errors.js";
@@ -110,8 +110,22 @@ export const splitwiseToLMCommand = () => {
         });
     }));
 };
+const collectSharesFn = (program) => {
+    return (value, previous = []) => {
+        const [idStr, percentStr] = value.split('=');
+        const id = parseInt(idStr);
+        const percent = parseFloat(percentStr);
+        if (isNaN(id) || isNaN(percent)) {
+            program.error(`Invalid share format: ${value}. Use "userId=sharePercent".`, {
+                exitCode: 1,
+            });
+        }
+        return previous.concat([{ id, percent }]);
+    };
+};
 export const lmToSplitwiseCommand = () => {
     const program = new Command();
+    const collectShares = collectSharesFn(program);
     return program
         .command('lm-to-splitwise')
         .description('Import Lunch Money transactions to a Splitwise group')
@@ -145,15 +159,29 @@ export const lmToSplitwiseCommand = () => {
             swGroupId: opts.group,
         });
     }));
-    function collectShares(value, previous = []) {
-        const [idStr, percentStr] = value.split('=');
-        const id = parseInt(idStr);
-        const percent = parseFloat(percentStr);
-        if (isNaN(id) || isNaN(percent)) {
-            program.error(`Invalid share format: ${value}. Use "userId=sharePercent".`, {
-                exitCode: 1,
-            });
-        }
-        return previous.concat([{ id, percent }]);
-    }
+};
+export const lmGroupToSplitwiseCommand = () => {
+    const program = new Command();
+    const collectShares = collectSharesFn(program);
+    return program
+        .command('lm-group-to-splitwise <id>')
+        .description('Import a Lunch Money transaction group to Splitwise (will delete & recreate the group in Lunch Money)')
+        .option('--add-tag <string>', 'Tag to add to the Lunch Money Transaction', 'splitwise-auto-added')
+        .option('--shares <string...>', 'User shares for unequal split. write in format "userId=sharePercent"', collectShares)
+        .option('--group <id>', 'Splitwise group ID. If not provided, will use SW_GROUP_ID env var', parseInt)
+        .option('--sw-api-key <string>', 'Splitwise API key. If not provided, will use SW_API_KEY env var')
+        .action(programWrapper(async (id, _opts, command) => {
+        const opts = command.optsWithGlobals();
+        const { addTag, shares, group, swApiKey, verbose, apiKey } = opts;
+        if (verbose)
+            logger.level = Infinity;
+        await lmGroupToSplitwise({
+            id: parseInt(id),
+            addTag,
+            unequalShares: shares,
+            swGroupId: group,
+            swApiKey,
+            lmApiKey: apiKey,
+        });
+    }));
 };

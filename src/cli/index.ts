@@ -14,6 +14,7 @@ import {
 import {
     getSplitwiseExpensesCommand,
     getSplitwiseGroupCommand,
+    lmGroupToSplitwiseCommand,
     lmToSplitwiseCommand,
     splitwiseToLMCommand,
 } from './commands/splitwise.ts'
@@ -25,7 +26,7 @@ const createProgram = () => {
         .option('-v, --verbose', 'Enable verbose logging')
         .option(
             '--api-key <KEY>',
-            'Lunch Money API key (if not set will look for LM_API_KEY in env)'
+            'Lunch Money API key (if not set will look for LM_API_KEY in env)',
         )
 
     return program
@@ -45,6 +46,7 @@ program.addCommand(getSplitwiseExpensesCommand())
 program.addCommand(getSplitwiseGroupCommand())
 program.addCommand(splitwiseToLMCommand())
 program.addCommand(lmToSplitwiseCommand())
+program.addCommand(lmGroupToSplitwiseCommand())
 
 program.parse()
 

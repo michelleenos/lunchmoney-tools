@@ -49,3 +49,15 @@ export declare const lmToSplitwiseCommand: () => Command<[], {
     verbose?: true | undefined;
     apiKey?: string | undefined;
 }>;
+export declare const lmGroupToSplitwiseCommand: () => Command<[string], {
+    addTag: string;
+    shares?: {
+        id: number;
+        percent: number;
+    }[] | undefined;
+    group?: number | undefined;
+    swApiKey?: string | undefined;
+}, {
+    verbose?: true | undefined;
+    apiKey?: string | undefined;
+}>;

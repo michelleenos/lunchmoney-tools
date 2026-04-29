@@ -31,7 +31,12 @@ export const printTransactions = (transactions, { id = true, date = true, payee 
     transactions.forEach((t) => {
         let amt = Number(t.amount);
         let exclude = t.exclude_from_totals;
-        let color = exclude ? 'gray' : amt < 0 ? 'green' : 'white';
+        // let color = exclude ? 'gray' : amt < 0 ? 'green' : 'white'
+        let color = undefined;
+        if (amt < 0)
+            color = 'green';
+        if (exclude)
+            color = 'gray';
         let isGroup = t.is_group;
         let isInGroup = t.group_id;
         let isSplit = t.parent_id;

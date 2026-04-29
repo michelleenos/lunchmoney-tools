@@ -1,6 +1,6 @@
 import { Command } from '@commander-js/extra-typings'
 import { printTable } from 'console-table-printer'
-import { lmToSplitwise } from '../../splitwise/lm-to-splitwise.ts'
+import { lmGroupToSplitwise, lmToSplitwise } from '../../splitwise/lm-to-splitwise.ts'
 import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
 import { splitwiseToLMWithUpdates } from '../../splitwise/splitwise-to-lm.ts'
 import { LMError } from '../../utils/errors.ts'
@@ -44,7 +44,7 @@ export const getSplitwiseExpensesCommand = () => {
                 printTable(
                     res.map((e) => {
                         const userPayment = e.repayments.find(
-                            (repayment) => repayment.from === sw.userId
+                            (repayment) => repayment.from === sw.userId,
                         )?.amount
 
                         return {
@@ -55,9 +55,9 @@ export const getSplitwiseExpensesCommand = () => {
                             user: e.created_by.first_name,
                             userPayment: userPayment ? money(userPayment) : '---',
                         }
-                    })
+                    }),
                 )
-            })
+            }),
         )
 }
 
@@ -69,11 +69,11 @@ export const getSplitwiseGroupCommand = () => {
         .option(
             '--group-id <id>',
             'Splitwise group ID. If not provided, will use SW_GROUP_ID env var',
-            parseInt
+            parseInt,
         )
         .option(
             '--sw-api-key <string>',
-            'Splitwise API key. If not provided, will use SW_API_KEY env var'
+            'Splitwise API key. If not provided, will use SW_API_KEY env var',
         )
         .action(
             programWrapper(async (_opts, command) => {
@@ -94,9 +94,9 @@ export const getSplitwiseGroupCommand = () => {
                             balance: member.balance.map((a) => money(a.amount)).join(', '),
                         }
                     }),
-                    { title: `Splitwise Group ${group.name} - ID: ${group.id}` }
+                    { title: `Splitwise Group ${group.name} - ID: ${group.id}` },
                 )
-            })
+            }),
         )
 }
 
@@ -113,21 +113,21 @@ export const splitwiseToLMCommand = () => {
             '-t, --tag <string...>',
             'Tag(s) to add to each transaction',
             (val) => val.split(',').map((s) => s.trim()),
-            ['splitwise-imported']
+            ['splitwise-imported'],
         )
         .option('--handle-dupes <option>', '"update" or "skip" (default "update")', 'update')
         .option(
             '--no-filter-self',
-            'By default, we will filter out expenses created by the current user; use this flag to include them.'
+            'By default, we will filter out expenses created by the current user; use this flag to include them.',
         )
         .option(
             '--group <id>',
             'Splitwise group ID. If not provided, will use SW_GROUP_ID env var',
-            parseInt
+            parseInt,
         )
         .option(
             '--sw-api-key <string>',
-            'Splitwise API key. If not provided, will use SW_API_KEY env var'
+            'Splitwise API key. If not provided, will use SW_API_KEY env var',
         )
         .option('--dry-run', 'Print transactions to console instead of adding them')
         .action(
@@ -140,7 +140,7 @@ export const splitwiseToLMCommand = () => {
                 if (handleDupes !== 'update' && handleDupes !== 'skip') {
                     throw new LMError(
                         `Unrecognized --handle-dupes option: ${handleDupes}. Must be 'update' or 'skip'.`,
-                        'config'
+                        'config',
                     )
                 }
 
@@ -156,12 +156,29 @@ export const splitwiseToLMCommand = () => {
                     swApiKey: opts.swApiKey,
                     handleDupes,
                 })
-            })
+            }),
         )
+}
+
+const collectSharesFn = (program: ChildCommandType) => {
+    return (value: string, previous: { id: number; percent: number }[] = []) => {
+        const [idStr, percentStr] = value.split('=')
+        const id = parseInt(idStr)
+        const percent = parseFloat(percentStr)
+
+        if (isNaN(id) || isNaN(percent)) {
+            program.error(`Invalid share format: ${value}. Use "userId=sharePercent".`, {
+                exitCode: 1,
+            })
+        }
+
+        return previous.concat([{ id, percent }])
+    }
 }
 
 export const lmToSplitwiseCommand = () => {
     const program: ChildCommandType = new Command()
+    const collectShares = collectSharesFn(program)
 
     return program
         .command('lm-to-splitwise')
@@ -169,7 +186,7 @@ export const lmToSplitwiseCommand = () => {
         .requiredOption(
             '-t, --tag-id <number>',
             'Lunch Money tag ID to pull transactions from (required)',
-            parseInt
+            parseInt,
         )
         .option('-s, --start-date <date>', 'Start date')
         .option('-e, --end-date <date>', 'End date')
@@ -177,23 +194,23 @@ export const lmToSplitwiseCommand = () => {
             '--exclude-tags <string...>',
             'Tag(s) to exclude, comma-separated',
             (val) => val.split(',').map((s) => s.trim()),
-            ['splitwise-auto-added']
+            ['splitwise-auto-added'],
         )
         .option('--add-tag <string>', 'Tag to add to Splitwise expenses', 'splitwise-auto-added')
         .option(
             '--shares <string...>',
             'User shares for unequal split. write in format "userId=sharePercent"',
-            collectShares
+            collectShares,
         )
         .option('--remove-tag', 'Remove the tag from the LM transaction after adding to Splitwise')
         .option(
             '--group <id>',
             'Splitwise group ID. If not provided, will use SW_GROUP_ID env var',
-            parseInt
+            parseInt,
         )
         .option(
             '--sw-api-key <string>',
-            'Splitwise API key. If not provided, will use SW_API_KEY env var'
+            'Splitwise API key. If not provided, will use SW_API_KEY env var',
         )
         .option('--dry-run', 'Print transactions to console instead of adding them')
         .action(
@@ -215,19 +232,52 @@ export const lmToSplitwiseCommand = () => {
                     swApiKey: opts.swApiKey,
                     swGroupId: opts.group,
                 })
-            })
+            }),
         )
-    function collectShares(value: string, previous: { id: number; percent: number }[] = []) {
-        const [idStr, percentStr] = value.split('=')
-        const id = parseInt(idStr)
-        const percent = parseFloat(percentStr)
+}
 
-        if (isNaN(id) || isNaN(percent)) {
-            program.error(`Invalid share format: ${value}. Use "userId=sharePercent".`, {
-                exitCode: 1,
-            })
-        }
+export const lmGroupToSplitwiseCommand = () => {
+    const program: ChildCommandType = new Command()
+    const collectShares = collectSharesFn(program)
 
-        return previous.concat([{ id, percent }])
-    }
+    return program
+        .command('lm-group-to-splitwise <id>')
+        .description(
+            'Import a Lunch Money transaction group to Splitwise (will delete & recreate the group in Lunch Money)',
+        )
+        .option(
+            '--add-tag <string>',
+            'Tag to add to the Lunch Money Transaction',
+            'splitwise-auto-added',
+        )
+        .option(
+            '--shares <string...>',
+            'User shares for unequal split. write in format "userId=sharePercent"',
+            collectShares,
+        )
+        .option(
+            '--group <id>',
+            'Splitwise group ID. If not provided, will use SW_GROUP_ID env var',
+            parseInt,
+        )
+        .option(
+            '--sw-api-key <string>',
+            'Splitwise API key. If not provided, will use SW_API_KEY env var',
+        )
+        .action(
+            programWrapper(async (id, _opts, command) => {
+                const opts = command.optsWithGlobals()
+                const { addTag, shares, group, swApiKey, verbose, apiKey } = opts
+                if (verbose) logger.level = Infinity
+
+                await lmGroupToSplitwise({
+                    id: parseInt(id),
+                    addTag,
+                    unequalShares: shares,
+                    swGroupId: group,
+                    swApiKey,
+                    lmApiKey: apiKey,
+                })
+            }),
+        )
 }

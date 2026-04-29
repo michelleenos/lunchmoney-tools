@@ -8,39 +8,41 @@ I needed a way to manage transactions programatically, particularly for importin
 
 - [✨ Features](#-features)
 - [CLI Installation](#cli-installation)
-  - [Option 1: Install from npm](#option-1-install-from-npm)
-  - [Option 2: Install from local directory (for development)](#option-2-install-from-local-directory-for-development)
+    - [Option 1: Install from npm](#option-1-install-from-npm)
+    - [Option 2: Install from local directory (for development)](#option-2-install-from-local-directory-for-development)
 - [Environment Setup](#environment-setup)
 - [CLI Usage](#cli-usage)
-  - [List of Commands](#list-of-commands)
-  - [Transactions](#transactions)
-  - [Accounts](#accounts)
-  - [Categories / Tags](#categories--tags)
-  - [Splitwise Integration](#splitwise-integration)
+    - [List of Commands](#list-of-commands)
+    - [Transactions](#transactions)
+    - [Accounts](#accounts)
+    - [Categories / Tags](#categories--tags)
+    - [Splitwise Integration](#splitwise-integration)
 - [API Reference](#api-reference)
-  - [`LunchMoneyApi`](#lunchmoneyapi)
-  - [Type Definitions](#type-definitions)
-  - [API Examples](#api-examples)
+    - [`LunchMoneyApi`](#lunchmoneyapi)
+    - [Type Definitions](#type-definitions)
+    - [API Examples](#api-examples)
 - [License](#license)
 
 ## ✨ Features
 
--   📝 **Full TypeScript Support** with complete type definitions for API responses and requests
--   🤖 **CLI Tools** for performing common operations and queries
--   🎨 **Console Output** - Colorized and formatted tables for data display
--   💾 **Data Export** - Option to export data to JSON files
--   🔄 **Splitwise integration** - Tools for importing expenses from Splitwise to Lunch Money
+- 📝 **Full TypeScript Support** with complete type definitions for API responses and requests
+- 🤖 **CLI Tools** for performing common operations and queries
+- 🎨 **Console Output** - Colorized and formatted tables for data display
+- 💾 **Data Export** - Option to export data to JSON files
+- 🔄 **Splitwise integration** - Tools for importing expenses from Splitwise to Lunch Money
 
 ## CLI Installation
 
 You can install the command line tool directly from npm, or clone this repo and run it locally
 
 ### Option 1: Install from npm
+
 ```bash
 npm install -g lunchmoney-tools
 ```
 
 ### Option 2: Install from local directory (for development)
+
 ```bash
 # Clone the repository
 git clone https://github.com/michelleenos/lunchmoney-tools.git
@@ -59,6 +61,7 @@ npm install -g .
 After installation, you can run `lm-tools` from anywhere in your terminal.
 
 Alternatively, you can run the cli as a node app directly from your project:
+
 ```bash
 node dist/cli/index.js
 ```
@@ -235,6 +238,8 @@ Options:
 
 #### Import Lunch Money Transactions to Splitwise
 
+_Note: Importing LM grouped or split transactions is currently not implemented. The CLI will show you a warning indicating which transactions were skipped and for what reason (either `group`, `groupChild`, `split`, or `groupAndSplit`)._
+
 ```bash
 Usage: lm-tools lm-to-splitwise [options]
 
@@ -266,20 +271,20 @@ class LunchMoneyApi {
 
     // Transactions
     getTransactions(
-        query?: LMTransactionsQuery
+        query?: LMTransactionsQuery,
     ): Promise<{ transactions: LMTransaction[]; has_more?: boolean }>
 
     getTransaction(id: number): Promise<LMTransaction>
 
     createTransactions(
         transactions: LMInsertTransactionObject[],
-        settings?: LMInsertTransactionsSettings
+        settings?: LMInsertTransactionsSettings,
     ): Promise<LMInsertTransactionsResponse>
 
     updateTransaction(
         id: number,
         transaction: LMUpdateTransactionObject,
-        settings?: Omit<LMUpdateTransactionBody, 'transaction'>
+        settings?: Omit<LMUpdateTransactionBody, 'transaction'>,
     ): Promise<LMUpdateTransactionResponse>
 
     // Categories
@@ -313,11 +318,11 @@ import type {
 
 Key types:
 
--   [`LMTransaction`](src/types/transactions/base.ts) - Complete transaction object
--   [`LMTransactionsQuery`](src/types/transactions/query.ts) - Interface used to create transactions
--   [`LMTag`](src/types/tags.ts)
--   [`LMCategory`](src/types/categories.ts)
--   [`LMAsset` and `LMPlaidAccount`](src/types/assets-and-accounts.ts)
+- [`LMTransaction`](src/types/transactions/base.ts) - Complete transaction object
+- [`LMTransactionsQuery`](src/types/transactions/query.ts) - Interface used to create transactions
+- [`LMTag`](src/types/tags.ts)
+- [`LMCategory`](src/types/categories.ts)
+- [`LMAsset` and `LMPlaidAccount`](src/types/assets-and-accounts.ts)
 
 ### API Examples
 

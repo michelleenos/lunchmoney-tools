@@ -90,7 +90,7 @@ export class SplitwiseApi {
         } catch (e) {
             throw new LMError(
                 `Missing Splitwise API key. Please set the SW_API_KEY environment variable.`,
-                'auth'
+                'auth',
             )
         }
 
@@ -103,12 +103,12 @@ export class SplitwiseApi {
             try {
                 this.groupId = getEnvVarNum('SW_GROUP_ID')
                 logger.info(
-                    `Using Splitwise group ID from environment variable SW_GROUP_ID: ${this.groupId}`
+                    `Using Splitwise group ID from environment variable SW_GROUP_ID: ${this.groupId}`,
                 )
             } catch (e) {
                 throw new LMError(
                     `Missing Splitwise group ID. Please set the SW_GROUP_ID environment variable.`,
-                    'config'
+                    'config',
                 )
             }
         }
@@ -125,7 +125,7 @@ export class SplitwiseApi {
 
         this.state = { ready: true, userId: user.id }
         logger.info(
-            `SplitwiseApi: Successfully connected to Splitwise; your user ID is: ${user.id}`
+            `SplitwiseApi: Successfully connected to Splitwise; your user ID is: ${user.id}`,
         )
 
         return this
@@ -134,16 +134,16 @@ export class SplitwiseApi {
     request = async <T = { [key: string]: any }>(
         method: 'GET' | 'POST',
         endpoint: string,
-        args: { [key: string]: any } = {}
+        args: { [key: string]: any } = {},
     ) => {
-        logger.info(`Splitwise API request: ${method} ${endpoint}`)
+        logger.verbose(`Splitwise API request: ${method} ${endpoint}`)
         if (args) logger.verbose(`Request args:`, args)
         let res = await doRequest(
             method,
             SW_URL,
             { Authorization: `Bearer ${this.apiKey}` },
             endpoint,
-            args
+            args,
         )
 
         const json: T | SplitwiseErrorObject | SplitwiseErrorString = await res.json()
@@ -179,11 +179,11 @@ export class SplitwiseApi {
         const res = await this.request<{ expenses: SplitwiseExpense[] }>(
             'GET',
             'get_expenses',
-            args
+            args,
         )
 
         logger.info(
-            `SplitwiseApi.getExpenses: Fetched ${res.expenses.length} expenses from Splitwise`
+            `SplitwiseApi.getExpenses: Fetched ${res.expenses.length} expenses from Splitwise`,
         )
 
         return res.expenses
@@ -196,7 +196,7 @@ export class SplitwiseApi {
 
     filterExpenses = (
         expenses: SplitwiseExpense[],
-        { filterPayment = true, filterSelf = true, filterDeleted = true }: FilterExpensesOpts = {}
+        { filterPayment = true, filterSelf = true, filterDeleted = true }: FilterExpensesOpts = {},
     ) => {
         let initLen = expenses.length
 
@@ -209,7 +209,7 @@ export class SplitwiseApi {
 
         logger.verbose(
             `SplitwiseApi.filterExpenses: From ${initLen} expenses, filtered to ${res.length} using options:`,
-            { filterPayment, filterDeleted, filterSelf }
+            { filterPayment, filterDeleted, filterSelf },
         )
 
         return res
@@ -218,12 +218,12 @@ export class SplitwiseApi {
     createGroupExpense = (
         args:
             | Omit<SplitwiseExpenseCreateEqual, 'group_id'>
-            | Omit<SplitwiseExpenseCreateUnequal<any>, 'group_id'>
+            | Omit<SplitwiseExpenseCreateUnequal<any>, 'group_id'>,
     ) => {
         if (!this.groupId) {
             throw new LMError(
                 'Sorry, this package does not support creating Splitwise expenses without a group.',
-                'config'
+                'config',
             )
         }
         const allArgs: SplitwiseExpenseCreate = {
@@ -234,12 +234,12 @@ export class SplitwiseApi {
     }
 
     getEqualExpenseCreateObject = (
-        expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>
+        expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
     ): SplitwiseExpenseCreateEqual => {
         if (!this.groupId) {
             throw new LMError(
                 'Sorry, this package does not support creating Splitwise expenses without a group.',
-                'config'
+                'config',
             )
         }
 
@@ -253,20 +253,20 @@ export class SplitwiseApi {
 
     getExpenseCreateObject<T extends { id: number; percent: number }[]>(
         expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
-        members: T
+        members: T,
     ): SplitwiseExpenseCreateUnequal<T['length']>
     getExpenseCreateObject(
-        expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>
+        expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
     ): SplitwiseExpenseCreateEqual
 
     getExpenseCreateObject<T extends { id: number; percent: number }[]>(
         expense: Omit<SplitwiseExpenseCreate, 'group_id' | 'split_equally'>,
-        members?: T
+        members?: T,
     ) {
         if (!this.groupId) {
             throw new LMError(
                 'Sorry, this package does not support creating Splitwise expenses without a group.',
-                'config'
+                'config',
             )
         }
 
@@ -299,7 +299,7 @@ export class SplitwiseApi {
         if (!groupId && !this.groupId) {
             throw new LMError(
                 'No group ID set. Please set the SW_GROUP_ID environment variable, or pass a group ID to the SplitwiseApi constructor or getCurrentGroup method.',
-                'config'
+                'config',
             )
         }
         return this.request<{ group: SplitwiseGroup }>('GET', `get_group/${this.groupId}`)

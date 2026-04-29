@@ -1,6 +1,5 @@
 const roundToCents = (n) => Math.floor(n * 100) / 100;
 /**
- *
  * @param members Array of members with their share percentages - put CREATOR first
  */
 export const splitUnevenlyQuery = (members, cost) => {

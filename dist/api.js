@@ -22,7 +22,7 @@ export class LunchMoneyApi {
         }
     }
     async request(method, endpoint, args = {}) {
-        logger.info(`Lunch Money API request: ${method} ${endpoint}`);
+        logger.verbose(`Lunch Money API request: ${method} ${endpoint}`);
         if (args)
             logger.verbose(`Request args: ${JSON.stringify(args, null, 2)}`);
         let res = await doRequest(method, LM_URL, { Authorization: `Bearer ${this.apiKey}` }, endpoint, args);

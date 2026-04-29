@@ -22,7 +22,7 @@ export class SplitwiseApi {
             return this;
         };
         this.request = async (method, endpoint, args = {}) => {
-            logger.info(`Splitwise API request: ${method} ${endpoint}`);
+            logger.verbose(`Splitwise API request: ${method} ${endpoint}`);
             if (args)
                 logger.verbose(`Request args:`, args);
             let res = await doRequest(method, SW_URL, { Authorization: `Bearer ${this.apiKey}` }, endpoint, args);

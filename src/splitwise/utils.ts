@@ -3,12 +3,11 @@ const roundToCents = (n: number) => Math.floor(n * 100) / 100
 import { SplitwiseUserShares } from './types-shares.ts'
 
 /**
- *
  * @param members Array of members with their share percentages - put CREATOR first
  */
 export const splitUnevenlyQuery = <T extends readonly { id: number; percent: number }[]>(
     members: T,
-    cost: number
+    cost: number,
 ): { shares: SplitwiseUserShares<T['length']>; userShare: number } => {
     let shares: [key: number, share: number][] = []
 
@@ -31,7 +30,7 @@ export const splitUnevenlyQuery = <T extends readonly { id: number; percent: num
             ;(acc as any)[`users__${i}__owed_share`] = share.toFixed(2)
             return acc
         },
-        { users__0__paid_share: cost.toFixed(2) } as Record<string, any>
+        { users__0__paid_share: cost.toFixed(2) } as Record<string, any>,
     ) as SplitwiseUserShares<T['length']>
 
     return { shares: params, userShare: shares[0][1] }

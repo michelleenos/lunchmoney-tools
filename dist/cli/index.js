@@ -2,7 +2,7 @@
 import { Command } from '@commander-js/extra-typings';
 import { getTransactionCommand, getTransactionsCommand, updateTransactionCommand, } from "./commands/transactions.js";
 import { getAccountsCommand, getAssetsCommand, getPlaidAccountsCommand, } from "./commands/accounts.js";
-import { getSplitwiseExpensesCommand, getSplitwiseGroupCommand, lmToSplitwiseCommand, splitwiseToLMCommand, } from "./commands/splitwise.js";
+import { getSplitwiseExpensesCommand, getSplitwiseGroupCommand, lmGroupToSplitwiseCommand, lmToSplitwiseCommand, splitwiseToLMCommand, } from "./commands/splitwise.js";
 import { getCategoriesCommand } from "./commands/categories.js";
 import { getTagsCommand } from "./commands/tags.js";
 const createProgram = () => {
@@ -24,4 +24,5 @@ program.addCommand(getSplitwiseExpensesCommand());
 program.addCommand(getSplitwiseGroupCommand());
 program.addCommand(splitwiseToLMCommand());
 program.addCommand(lmToSplitwiseCommand());
+program.addCommand(lmGroupToSplitwiseCommand());
 program.parse();
