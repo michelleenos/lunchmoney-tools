@@ -1,7 +1,7 @@
 import { Command } from '@commander-js/extra-typings'
 import { LunchMoneyApi } from '../../api.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
-import { ChildCommandType } from '../index.ts'
+import { ChildCommandType } from '../program.ts'
 import { getLogger } from '../../logger.ts'
 import { printCategories } from '../cli-utils/print.ts'
 

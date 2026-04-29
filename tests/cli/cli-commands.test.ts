@@ -1,9 +1,8 @@
-/// <reference types="node" />
 import { execSync } from 'child_process'
 import { describe, expect, it } from 'vitest'
 
 describe('CLI commands', () => {
-    it('should display help', () => {
+    it('should display help', async () => {
         const output = execSync('pnpm tsx src/cli/index.ts --help', { encoding: 'utf8' })
         expect(output).toContain('Usage: lm-tools')
         expect(output).toContain('get-transactions')

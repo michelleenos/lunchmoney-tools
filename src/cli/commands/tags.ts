@@ -3,7 +3,7 @@ import { LunchMoneyApi } from '../../api.ts'
 import { getLogger } from '../../logger.ts'
 import { printTags } from '../cli-utils/print.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
-import { ChildCommandType } from '../index.ts'
+import { ChildCommandType } from '../program.ts'
 
 const logger = getLogger()
 

@@ -3,6 +3,7 @@ import { LunchMoneyApi } from "../api.js";
 import { getLogger } from "../logger.js";
 import { display, money } from "../cli/cli-utils/write-stuff.js";
 import { SplitwiseApi } from "./splitwise-api.js";
+// TODO remove table printing from here, move to CLI when used there (match Amazon amazon-to-lm)
 const logger = getLogger();
 const skipWarning = (t, reason) => {
     logger.warn(`Skipping transaction ${t.payee || 'unknown'} (${t.id}) - ${reason}.`);

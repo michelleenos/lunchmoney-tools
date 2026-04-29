@@ -3,6 +3,8 @@ import { printTable, Table } from 'console-table-printer'
 import { colors } from './ansi-colors.ts'
 import { display, money } from './write-stuff.ts'
 
+// TODO test these directly
+
 type PrintTransactionShow = {
     id?: boolean
     date?: boolean

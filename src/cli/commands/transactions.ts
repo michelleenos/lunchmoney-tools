@@ -4,7 +4,7 @@ import { writeJson } from '../../utils/files.ts'
 import { getLogger } from '../../logger.ts'
 import { printTransactions } from '../cli-utils/print.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
-import { ChildCommandType } from '../index.ts'
+import { ChildCommandType } from '../program.ts'
 import { LMUpdateTransactionObject } from '../../types/index.ts'
 
 let logger = getLogger()

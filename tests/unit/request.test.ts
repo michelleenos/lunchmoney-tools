@@ -34,7 +34,7 @@ describe('doRequest function', () => {
                 method: 'GET',
                 headers: testHeaders,
                 body: undefined,
-            }
+            },
         )
 
         expect(result).toMatchObject({ ok: true, status: 200 })

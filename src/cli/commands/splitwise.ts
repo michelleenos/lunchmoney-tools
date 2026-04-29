@@ -7,7 +7,7 @@ import { LMError } from '../../utils/errors.ts'
 import { getLogger } from '../../logger.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { display, money } from '../cli-utils/write-stuff.ts'
-import { ChildCommandType, RootProgramOpts } from '../index.ts'
+import { ChildCommandType, RootProgramOpts } from '../program.ts'
 
 const logger = getLogger()
 

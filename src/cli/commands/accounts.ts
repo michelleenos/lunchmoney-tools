@@ -2,7 +2,7 @@ import { Command } from '@commander-js/extra-typings'
 import { LunchMoneyApi } from '../../api.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { printAccounts } from '../cli-utils/print.ts'
-import { ChildCommandType } from '../index.ts'
+import { ChildCommandType } from '../program.ts'
 import { getLogger } from '../../logger.ts'
 
 const logger = getLogger()

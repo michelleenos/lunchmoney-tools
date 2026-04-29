@@ -5,6 +5,7 @@ import { getLogger } from "../../logger.js";
 import { LunchMoneyApi } from "../../api.js";
 import { amazonToLM } from "../../amazon/amazon-to-lm.js";
 import { writeJson } from "../../utils/files.js";
+// TODO testing, docs
 const logger = getLogger();
 async function writeJsonData(fileDir, fileName, data) {
     logger.info(`${fileDir}/${fileName}`);

@@ -6,7 +6,7 @@ import { getEnvVarNum } from '../../utils/env-vars.ts'
 import { getLogger } from '../../logger.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { money } from '../cli-utils/write-stuff.ts'
-import { ChildCommandType } from '../index.ts'
+import { ChildCommandType } from '../program.ts'
 
 let logger = getLogger()
 export const splitwiseMatchLMCommand = () => {
