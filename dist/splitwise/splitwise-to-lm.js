@@ -75,13 +75,18 @@ export const splitwiseToLMWithUpdates = async ({ startDate, endDate, assetId: as
             }
         }
         else {
+            let notes = `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`;
+            if (notes.length > 350) {
+                // notes = decode(notes.trim())
+                notes = notes.slice(0, 347) + '...';
+            }
             const newTransaction = {
                 date: new Date(date).toISOString().split('T')[0],
                 payee: description,
                 tags: Array.isArray(tag) ? tag : [tag],
                 asset_id: assetId,
                 amount: userPayment,
-                notes: `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`,
+                notes,
                 external_id: `splitwise-${id}`,
             };
             create.push(newTransaction);

@@ -68,7 +68,7 @@ export const splitwiseToLMWithUpdates = async ({
         } catch (e) {
             throw new LMError(
                 'No asset ID provided; either provide it with --asset-id or set LM_SW_ASSET_ID env variable',
-                'config'
+                'config',
             )
         }
 
@@ -91,20 +91,23 @@ export const splitwiseToLMWithUpdates = async ({
     const transactions = lmRes.transactions
 
     logger.info(
-        `Found ${expenses.length} expenses from Splitwise, and ${lmRes.transactions.length} transactions from LunchMoney.`
+        `Found ${expenses.length} expenses from Splitwise, and ${lmRes.transactions.length} transactions from LunchMoney.`,
     )
 
-    const expensesWithPayment = expenses.reduce((acc, exp) => {
-        const userPayment = exp.repayments.find((r) => r.from === sw.userId)?.amount
-        if (userPayment) {
-            acc.push({
-                ...exp,
-                userPayment: parseFloat(userPayment).toFixed(2),
-            })
-        }
+    const expensesWithPayment = expenses.reduce(
+        (acc, exp) => {
+            const userPayment = exp.repayments.find((r) => r.from === sw.userId)?.amount
+            if (userPayment) {
+                acc.push({
+                    ...exp,
+                    userPayment: parseFloat(userPayment).toFixed(2),
+                })
+            }
 
-        return acc
-    }, [] as (SplitwiseExpense & { userPayment: string })[])
+            return acc
+        },
+        [] as (SplitwiseExpense & { userPayment: string })[],
+    )
 
     const existed: SplitwiseToLMUpdateData[] = []
     const create: LMInsertTransactionObject[] = []
@@ -113,7 +116,7 @@ export const splitwiseToLMWithUpdates = async ({
         const { id, description, date, cost, created_by, details, userPayment } = expense
 
         let existing = transactions.find(
-            (t) => t.external_id === `splitwise-${id}` || t.external_id === id.toString()
+            (t) => t.external_id === `splitwise-${id}` || t.external_id === id.toString(),
         )
 
         if (existing) {
@@ -121,8 +124,8 @@ export const splitwiseToLMWithUpdates = async ({
                 logger.verbose(
                     `Splitwise expense "${display(
                         description,
-                        30
-                    )}" already exists in LunchMoney, skipping.`
+                        30,
+                    )}" already exists in LunchMoney, skipping.`,
                 )
                 continue
             }
@@ -133,8 +136,8 @@ export const splitwiseToLMWithUpdates = async ({
                 logger.verbose(
                     `Splitwise expense "${display(
                         description,
-                        30
-                    )}" is already matched in LunchMoney. Skipping update.`
+                        30,
+                    )}" is already matched in LunchMoney. Skipping update.`,
                 )
                 continue
             }
@@ -147,27 +150,32 @@ export const splitwiseToLMWithUpdates = async ({
                         amount: update.correctAmount || update.amount,
                         notes: update.notes,
                     },
-                    { skip_balance_update, debit_as_negative }
+                    { skip_balance_update, debit_as_negative },
                 )
 
                 if (updateRes.updated) {
                     logger.info(
-                        `Updated transaction ${existing.id} to match Splitwise expense ${id}`
+                        `Updated transaction ${existing.id} to match Splitwise expense ${id}`,
                     )
                 } else {
                     throw new LMError(
-                        `Failed to update transaction ${existing.id} for Splitwise expense ${id}`
+                        `Failed to update transaction ${existing.id} for Splitwise expense ${id}`,
                     )
                 }
             }
         } else {
+            let notes = `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`
+            if (notes.length > 350) {
+                // notes = decode(notes.trim())
+                notes = notes.slice(0, 347) + '...'
+            }
             const newTransaction: LMInsertTransactionObject = {
                 date: new Date(date).toISOString().split('T')[0],
                 payee: description,
                 tags: Array.isArray(tag) ? tag : [tag],
                 asset_id: assetId,
                 amount: userPayment,
-                notes: `Splitwise: ${cost} from ${created_by.first_name}. ${details || ''}`,
+                notes,
                 external_id: `splitwise-${id}`,
             }
 
@@ -186,11 +194,11 @@ export const splitwiseToLMWithUpdates = async ({
 
                 if (res.ids.length === 0) {
                     logger.warn(
-                        `Failed to add transaction for Splitwise expense ${id}: ${description}, ${userPayment} on ${date}, might be a duplicate we didn't find`
+                        `Failed to add transaction for Splitwise expense ${id}: ${description}, ${userPayment} on ${date}, might be a duplicate we didn't find`,
                     )
                 } else {
                     logger.info(
-                        `Added transaction for Splitwise expense ${id}: ${description}, ${userPayment} on ${date}`
+                        `Added transaction for Splitwise expense ${id}: ${description}, ${userPayment} on ${date}`,
                     )
                 }
             }
@@ -208,7 +216,7 @@ export const splitwiseToLMWithUpdates = async ({
             })),
             {
                 title: `Dry run: ${create.length} transactions to be added in Lunch Money`,
-            }
+            },
         )
 
         if (handleDupes === 'update') {
@@ -237,7 +245,7 @@ export const splitwiseToLMWithUpdates = async ({
                         correctAmount: u.correctAmount,
                         notes: display(u.notes, 0),
                     },
-                    { color: u.matches ? undefined : 'red' }
+                    { color: u.matches ? undefined : 'red' },
                 )
             })
             tab.printTable()
@@ -260,7 +268,7 @@ type SplitwiseToLMUpdateData = {
 
 const getSwToLMUpdateData = (
     exp: SplitwiseExpense & { userPayment: string },
-    tr: LMTransaction
+    tr: LMTransaction,
 ) => {
     let matchedAmount = money(tr.amount) === money(exp.userPayment)
     let trDate = new Date(tr.date).toISOString().split('T')[0]
