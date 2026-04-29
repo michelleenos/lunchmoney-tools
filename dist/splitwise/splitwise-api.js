@@ -2,7 +2,7 @@ import { doRequest } from "../utils/request.js";
 import { isSplitwiseErrorObject, isSplitwiseErrorString, } from "./types.js";
 import { getEnvVarNum, getEnvVarString } from "../utils/env-vars.js";
 import { LMError } from "../utils/errors.js";
-import { getLogger } from "../cli/cli-utils/logger.js";
+import { getLogger } from "../logger.js";
 import { splitUnevenlyQuery } from "./utils.js";
 export const SW_URL = 'https://secure.splitwise.com/api/v3.0';
 function assertReady(state) {

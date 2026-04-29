@@ -1,7 +1,7 @@
 import { doRequest } from "./utils/request.js";
 import { getEnvVarString } from "./utils/env-vars.js";
 import { LMError } from "./utils/errors.js";
-import { getLogger } from "./cli/cli-utils/logger.js";
+import { getLogger } from "./logger.js";
 import { adjustTags } from "./utils/adjust-tags.js";
 export const LM_URL = `https://dev.lunchmoney.app/v1`;
 const logger = getLogger();

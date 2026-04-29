@@ -15,7 +15,7 @@ import {
 } from './types.ts'
 import { getEnvVarNum, getEnvVarString } from '../utils/env-vars.ts'
 import { LMError } from '../utils/errors.ts'
-import { getLogger } from '../cli/cli-utils/logger.ts'
+import { getLogger } from '../logger.ts'
 import { splitUnevenlyQuery } from './utils.ts'
 
 export const SW_URL = 'https://secure.splitwise.com/api/v3.0'

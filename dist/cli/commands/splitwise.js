@@ -4,7 +4,7 @@ import { lmGroupToSplitwise, lmToSplitwise } from "../../splitwise/lm-to-splitwi
 import { SplitwiseApi } from "../../splitwise/splitwise-api.js";
 import { splitwiseToLMWithUpdates } from "../../splitwise/splitwise-to-lm.js";
 import { LMError } from "../../utils/errors.js";
-import { getLogger } from "../cli-utils/logger.js";
+import { getLogger } from "../../logger.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
 import { display, money } from "../cli-utils/write-stuff.js";
 const logger = getLogger();

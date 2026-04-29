@@ -4,9 +4,11 @@ export const writeJson = async (dir, fileName, data) => {
     const filePath = `${dir}/${fileName}`;
     await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 };
-export const getDataFilesDir = (writeFiles) => {
+export const getDataFilesDir = (writeFiles, subdir) => {
     if (typeof writeFiles === 'string') {
         return writeFiles;
     }
+    if (subdir)
+        return `.lm-tools-data/${subdir}`;
     return `.lm-tools-data`;
 };

@@ -1,10 +1,11 @@
 import { Table } from 'console-table-printer'
 import { LunchMoneyApi } from '../api.ts'
-import { getLogger } from '../cli/cli-utils/logger.ts'
+import { getLogger } from '../logger.ts'
 import { display, money } from '../cli/cli-utils/write-stuff.ts'
 import { LMTransaction } from '../types/index.ts'
 import { SplitwiseApi } from './splitwise-api.ts'
-import { SplitwiseExpenseCreate } from './types.ts'
+
+// TODO remove table printing from here, move to CLI when used there (match Amazon amazon-to-lm)
 
 const logger = getLogger()
 

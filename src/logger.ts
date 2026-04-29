@@ -1,13 +1,12 @@
 import { ConsolaInstance, createConsola } from 'consola'
 
-let logThings: { logger: ConsolaInstance }
+let loggerData: { logger: ConsolaInstance }
 
 export const getLogger = () => {
-    if (!logThings) {
+    if (!loggerData) {
         const logger = createConsola()
 
-        logThings = { logger }
+        loggerData = { logger }
     }
-
-    return logThings.logger
+    return loggerData.logger
 }

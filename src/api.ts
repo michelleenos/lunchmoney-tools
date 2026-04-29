@@ -21,7 +21,7 @@ import {
 } from './types/transactions/groups.ts'
 import { LMTransactionsQuery } from './types/transactions/query.ts'
 import { LMError } from './utils/errors.ts'
-import { getLogger } from './cli/cli-utils/logger.ts'
+import { getLogger } from './logger.ts'
 import { LMTag } from './types/tags.ts'
 import { adjustTags } from './utils/adjust-tags.ts'
 

@@ -1,5 +1,5 @@
 import { LMError } from '../../utils/errors.ts'
-import { getLogger } from './logger.ts'
+import { getLogger } from '../../logger.ts'
 
 let logger = getLogger()
 

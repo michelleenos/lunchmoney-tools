@@ -1,5 +1,5 @@
 import { LMError } from "../../utils/errors.js";
-import { getLogger } from "./logger.js";
+import { getLogger } from "../../logger.js";
 let logger = getLogger();
 export const programWrapper = (asyncFn) => {
     return async (...args) => {

@@ -5,6 +5,7 @@ import { getAccountsCommand, getAssetsCommand, getPlaidAccountsCommand, } from "
 import { getSplitwiseExpensesCommand, getSplitwiseGroupCommand, lmGroupToSplitwiseCommand, lmToSplitwiseCommand, splitwiseToLMCommand, } from "./commands/splitwise.js";
 import { getCategoriesCommand } from "./commands/categories.js";
 import { getTagsCommand } from "./commands/tags.js";
+import { amazonToLMCommand } from "./commands/amazon.js";
 const createProgram = () => {
     const program = new Command()
         .option('-v, --verbose', 'Enable verbose logging')
@@ -25,4 +26,5 @@ program.addCommand(getSplitwiseGroupCommand());
 program.addCommand(splitwiseToLMCommand());
 program.addCommand(lmToSplitwiseCommand());
 program.addCommand(lmGroupToSplitwiseCommand());
+program.addCommand(amazonToLMCommand());
 program.parse();

@@ -1,7 +1,7 @@
 import { Command } from '@commander-js/extra-typings';
 import { LunchMoneyApi } from "../../api.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
-import { getLogger } from "../cli-utils/logger.js";
+import { getLogger } from "../../logger.js";
 import { printCategories } from "../cli-utils/print.js";
 const logger = getLogger();
 export const getCategoriesCommand = () => {

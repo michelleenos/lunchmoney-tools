@@ -3,7 +3,7 @@ import { LunchMoneyApi } from '../../api.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { printAccounts } from '../cli-utils/print.ts'
 import { ChildCommandType } from '../index.ts'
-import { getLogger } from '../cli-utils/logger.ts'
+import { getLogger } from '../../logger.ts'
 
 const logger = getLogger()
 
@@ -22,7 +22,7 @@ export const getAssetsCommand = () => {
                 const res = await lm.getAssets()
 
                 printAccounts(res.assets)
-            })
+            }),
         )
 }
 
@@ -40,7 +40,7 @@ export const getPlaidAccountsCommand = () => {
                 const res = await lm.getPlaidAccounts()
 
                 printAccounts(res.plaid_accounts)
-            })
+            }),
         )
 }
 
@@ -61,6 +61,6 @@ export const getAccountsCommand = () => {
                 const assetRes = await lm.getAssets()
 
                 printAccounts([...plaidRes.plaid_accounts, ...assetRes.assets])
-            })
+            }),
         )
 }

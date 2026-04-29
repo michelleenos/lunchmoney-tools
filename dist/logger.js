@@ -1,9 +1,9 @@
 import { createConsola } from 'consola';
-let logThings;
+let loggerData;
 export const getLogger = () => {
-    if (!logThings) {
+    if (!loggerData) {
         const logger = createConsola();
-        logThings = { logger };
+        loggerData = { logger };
     }
-    return logThings.logger;
+    return loggerData.logger;
 };

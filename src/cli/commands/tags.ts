@@ -1,6 +1,6 @@
 import { Command } from '@commander-js/extra-typings'
 import { LunchMoneyApi } from '../../api.ts'
-import { getLogger } from '../cli-utils/logger.ts'
+import { getLogger } from '../../logger.ts'
 import { printTags } from '../cli-utils/print.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { ChildCommandType } from '../index.ts'
@@ -32,6 +32,6 @@ export const getTagsCommand = () => {
                     showId: id,
                     showDescription: description,
                 })
-            })
+            }),
         )
 }

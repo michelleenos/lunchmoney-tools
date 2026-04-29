@@ -1,6 +1,6 @@
 import { Table } from 'console-table-printer';
 import { LunchMoneyApi } from "../api.js";
-import { getLogger } from "../cli/cli-utils/logger.js";
+import { getLogger } from "../logger.js";
 import { display, money } from "../cli/cli-utils/write-stuff.js";
 import { SplitwiseApi } from "./splitwise-api.js";
 const logger = getLogger();

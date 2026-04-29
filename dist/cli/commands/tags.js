@@ -1,6 +1,6 @@
 import { Command } from '@commander-js/extra-typings';
 import { LunchMoneyApi } from "../../api.js";
-import { getLogger } from "../cli-utils/logger.js";
+import { getLogger } from "../../logger.js";
 import { printTags } from "../cli-utils/print.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
 const logger = getLogger();

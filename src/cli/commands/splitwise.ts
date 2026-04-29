@@ -4,7 +4,7 @@ import { lmGroupToSplitwise, lmToSplitwise } from '../../splitwise/lm-to-splitwi
 import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
 import { splitwiseToLMWithUpdates } from '../../splitwise/splitwise-to-lm.ts'
 import { LMError } from '../../utils/errors.ts'
-import { getLogger } from '../cli-utils/logger.ts'
+import { getLogger } from '../../logger.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { display, money } from '../cli-utils/write-stuff.ts'
 import { ChildCommandType, RootProgramOpts } from '../index.ts'

@@ -1,6 +1,6 @@
 import { printTable, Table } from 'console-table-printer'
 import { LunchMoneyApi } from '../api.ts'
-import { getLogger } from '../cli/cli-utils/logger.ts'
+import { getLogger } from '../logger.ts'
 import { display, money } from '../cli/cli-utils/write-stuff.ts'
 import type {
     LMInsertTransactionObject,
@@ -11,6 +11,8 @@ import { LMError } from '../utils/errors.ts'
 import { SplitwiseApi } from './splitwise-api.ts'
 import type { SplitwiseExpense } from './types.ts'
 import { getEnvVarNum } from '../utils/env-vars.ts'
+
+const logger = getLogger()
 
 interface SplitwiseToLMOpts {
     startDate?: string
@@ -34,8 +36,6 @@ interface SplitwiseToLMOpts {
     handleDupes?: 'update' | 'skip'
     lmInsertSettings?: LMInsertTransactionsSettings
 }
-
-const logger = getLogger()
 
 export const splitwiseToLMWithUpdates = async ({
     startDate,

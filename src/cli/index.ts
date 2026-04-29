@@ -20,6 +20,7 @@ import {
 } from './commands/splitwise.ts'
 import { getCategoriesCommand } from './commands/categories.ts'
 import { getTagsCommand } from './commands/tags.ts'
+import { amazonToLMCommand } from './commands/amazon.ts'
 
 const createProgram = () => {
     const program = new Command()
@@ -47,6 +48,7 @@ program.addCommand(getSplitwiseGroupCommand())
 program.addCommand(splitwiseToLMCommand())
 program.addCommand(lmToSplitwiseCommand())
 program.addCommand(lmGroupToSplitwiseCommand())
+program.addCommand(amazonToLMCommand())
 
 program.parse()
 

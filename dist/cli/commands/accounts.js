@@ -2,7 +2,7 @@ import { Command } from '@commander-js/extra-typings';
 import { LunchMoneyApi } from "../../api.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
 import { printAccounts } from "../cli-utils/print.js";
-import { getLogger } from "../cli-utils/logger.js";
+import { getLogger } from "../../logger.js";
 const logger = getLogger();
 export const getAssetsCommand = () => {
     const program = new Command();

@@ -3,7 +3,7 @@ import { Table } from 'console-table-printer';
 import { LunchMoneyApi } from "../../api.js";
 import { SplitwiseApi } from "../../splitwise/splitwise-api.js";
 import { getEnvVarNum } from "../../utils/env-vars.js";
-import { getLogger } from "../cli-utils/logger.js";
+import { getLogger } from "../../logger.js";
 import { programWrapper } from "../cli-utils/program-wrapper.js";
 import { money } from "../cli-utils/write-stuff.js";
 let logger = getLogger();

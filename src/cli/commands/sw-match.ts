@@ -3,7 +3,7 @@ import { Table } from 'console-table-printer'
 import { LunchMoneyApi } from '../../api.ts'
 import { SplitwiseApi } from '../../splitwise/splitwise-api.ts'
 import { getEnvVarNum } from '../../utils/env-vars.ts'
-import { getLogger } from '../cli-utils/logger.ts'
+import { getLogger } from '../../logger.ts'
 import { programWrapper } from '../cli-utils/program-wrapper.ts'
 import { money } from '../cli-utils/write-stuff.ts'
 import { ChildCommandType } from '../index.ts'
@@ -45,12 +45,12 @@ export const splitwiseMatchLMCommand = () => {
 
                 for (const expense of swExpenses) {
                     const userPayment = expense.repayments.find(
-                        (repayment) => repayment.from === sw.userId
+                        (repayment) => repayment.from === sw.userId,
                     )?.amount
 
                     if (userPayment === undefined) {
                         console.warn(
-                            `No payment found for user in expense "${expense.description}", skipping`
+                            `No payment found for user in expense "${expense.description}", skipping`,
                         )
                         continue
                     }
@@ -58,7 +58,7 @@ export const splitwiseMatchLMCommand = () => {
                     let tr = lmTransactions.transactions.find(
                         (t) =>
                             t.external_id === expense.id.toString() ||
-                            t.external_id === `splitwise-${expense.id}`
+                            t.external_id === `splitwise-${expense.id}`,
                     )
 
                     if (tr) {
@@ -83,7 +83,7 @@ export const splitwiseMatchLMCommand = () => {
                             },
                             {
                                 color: diff ? 'yellow' : undefined,
-                            }
+                            },
                         )
                     } else {
                         table.addRow(
@@ -96,12 +96,12 @@ export const splitwiseMatchLMCommand = () => {
                             },
                             {
                                 color: 'red',
-                            }
+                            },
                         )
                     }
                 }
 
                 table.printTable()
-            })
+            }),
         )
 }
