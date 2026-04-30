@@ -1,1 +1,11 @@
 - [ ] splitwise-to-lm: warn user if they haven't provided a start date (by default will fetch SW transactions indefinitely but not LM)
+- [ ] explore console table alternatives
+    - Claude suggestions: cli-table3, table, tty-table
+- [ ] more consistent & clear logging
+    - use consola.debug instead of verbose (and adjust logger.level = Infinity to logger.level = 4)
+    - use scoped loggers (ex: `logger.withTag('api')`)
+    - use consola `wrapConsole()`
+    - use richer logs (success, ready, fail, debug, box)
+    - replace `process.exit` with `logger.fatal()`
+    - look at console format options
+- [ ] make table printing only happen in the CLI, not when using the library

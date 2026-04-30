@@ -5,6 +5,7 @@ import { getLogger } from "../../logger.js";
 import { LunchMoneyApi } from "../../api.js";
 import { amazonToLM } from "../../amazon/amazon-to-lm.js";
 import { writeJson } from "../../utils/files.js";
+import { display } from "../cli-utils/write-stuff.js";
 // TODO testing, docs
 const logger = getLogger();
 async function writeJsonData(fileDir, fileName, data) {
@@ -116,7 +117,8 @@ export const amazonToLMCommand = () => {
                     { name: 'date' },
                     { name: 'total' },
                     { name: 'lmId' },
-                    { name: 'payee', maxLen: 30 },
+                    { name: 'payee' },
+                    { name: 'items', maxLen: 50 },
                 ],
             });
             successes.forEach(({ amazon, lunchMoney }) => {
@@ -125,7 +127,8 @@ export const amazonToLMCommand = () => {
                     date: amazon.date,
                     total: amazon.total,
                     lmId: lunchMoney.id,
-                    payee: lunchMoney.payee,
+                    payee: display(lunchMoney.payee, 20),
+                    items: amazon.items,
                 });
             });
             t.printTable();

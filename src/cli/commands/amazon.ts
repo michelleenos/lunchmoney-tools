@@ -6,6 +6,7 @@ import { ChildCommandType } from '../program.ts'
 import { LunchMoneyApi } from '../../api.ts'
 import { amazonToLM } from '../../amazon/amazon-to-lm.ts'
 import { writeJson } from '../../utils/files.ts'
+import { display } from '../cli-utils/write-stuff.ts'
 
 // TODO testing, docs
 
@@ -156,7 +157,8 @@ export const amazonToLMCommand = () => {
                             { name: 'date' },
                             { name: 'total' },
                             { name: 'lmId' },
-                            { name: 'payee', maxLen: 30 },
+                            { name: 'payee' },
+                            { name: 'items', maxLen: 50 },
                         ],
                     })
                     successes.forEach(({ amazon, lunchMoney }) => {
@@ -165,7 +167,8 @@ export const amazonToLMCommand = () => {
                             date: amazon.date,
                             total: amazon.total,
                             lmId: lunchMoney.id,
-                            payee: lunchMoney.payee,
+                            payee: display(lunchMoney.payee, 20),
+                            items: amazon.items,
                         })
                     })
                     t.printTable()

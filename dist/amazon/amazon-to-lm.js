@@ -17,8 +17,6 @@ export const amazonToLM = async (lunchMoney, { filters, tags = ['amazon-link'], 
         filters,
         startDate,
         endDate,
-        // writeAllDataToJson,
-        // writeFilesDir: folder,
         filePath,
     });
     if (!orders || orders.length === 0) {
@@ -46,9 +44,6 @@ export const amazonToLM = async (lunchMoney, { filters, tags = ['amazon-link'], 
     const errors = [];
     const successes = [];
     logger.verbose(`Analyzing ${orders.length} Amazon orders, looking for matches in ${lmTransactions.length} Lunch Money transactions...`);
-    // if (writeAllDataToJson) {
-    //     await writeJson(folder, 'lm-transactions.json', lmTransactions)
-    // }
     for (const order of orders) {
         i++;
         const matchingTransactions = searchTransactions(lmTransactions, {
@@ -70,9 +65,12 @@ export const amazonToLM = async (lunchMoney, { filters, tags = ['amazon-link'], 
                 continue;
             }
             try {
-                let notes = `${itemsStr} - ${order.orderUrl.split('&ref')[0]}`;
+                // let notes = `${itemsStr} - ${order.orderUrl.split('&ref')[0]}`
+                let notes = `${transaction.notes ? transaction.notes + ' | ' : ''}${order.orderUrl.split('&ref')[0]}`;
+                let payee = `${transaction.payee || 'Amazon'} - ${itemsStr}`;
                 await lunchMoney.updateTransaction(transaction.id, {
                     notes,
+                    payee,
                     addTags: tags,
                 });
                 logger.info(`🎉 Updated transaction ${transaction.id} with notes ${notes}`);
@@ -88,37 +86,6 @@ export const amazonToLM = async (lunchMoney, { filters, tags = ['amazon-link'], 
             unmatched.push(order);
         }
     }
-    // if (unmatched.length > 0) {
-    //     const fileName = `amazon-orders-no-match.json`
-    //     logger.warn(
-    //         `❗ ${unmatched.length} Amazon orders were not able to be matched with LM transactions. Saving unmatched order data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, unmatched)
-    // }
-    // if (extraMatches.length > 0) {
-    //     const fileName = `amazon-orders-extra-matches.json`
-    //     logger.warn(
-    //         `❗ ${extraMatches.length} Amazon orders matched with multiple LM transactions, so we aren't sure which to use. Saving order & transaction data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, extraMatches)
-    // }
-    // if (errors.length > 0) {
-    //     const fileName = `amazon-orders-errored-items.json`
-    //     console.warn(
-    //         `❗ Encountered other errors when trying to match ${errors.length} Amazon orders. Saving these items' data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, errors)
-    // }
-    // if (successes.length > 0) {
-    //     logger.info(
-    //         `✨ Found matches for ${successes.length} order items and updated Lunch Money transactions.`,
-    //     )
-    //     if (writeAllDataToJson) {
-    //         const fileName = dryRun ? `amazon-orders-dry-run.json` : 'amazon-orders-successful.json'
-    //         logger.info(`Writing successful items data to ${folder}/${fileName}`)
-    //         await writeJson(folder, fileName, successes)
-    //     }
-    // }
     return { successes, errors, extraMatches, unmatched, rowsWithIssues };
 };
 async function parseAmazonData({ filters: { to: toField, payment: paymentContains } = {}, startDate, endDate, filePath, }) {
@@ -165,22 +132,6 @@ async function parseAmazonData({ filters: { to: toField, payment: paymentContain
             to: row.to,
         });
     });
-    // if (missingFieldsData.length > 0) {
-    //     const fileName = 'amazon-data-issues.json'
-    //     logger.warn(
-    //         `⚠️ unable to parse ${missingFieldsData.length} rows. Writing these rows data to ${writeFilesDir}/${fileName}.`,
-    //     )
-    //     await writeJson(writeFilesDir, fileName, missingFieldsData)
-    // }
     logger.info(`Parsed ${transformedRows.length} Amazon orders successfully out of ${data.length} rows.`);
-    if (transformedRows.length > 0) {
-        // if (writeAllDataToJson) {
-        //     const fileName = 'orders.json'
-        //     logger.info(
-        //         `📝 Writing ${transformedData.length} parsed Amazon orders to ${writeFilesDir}/${fileName}`,
-        //     )
-        //     await writeJson(writeFilesDir, fileName, transformedData)
-        // }
-    }
     return { transformedRows, rowsWithIssues };
 }

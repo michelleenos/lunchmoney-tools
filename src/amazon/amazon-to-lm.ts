@@ -1,7 +1,6 @@
 import { LunchMoneyApi } from '../api.ts'
 import { getLogger } from '../logger.ts'
 import { LMTransaction } from '../types/index.ts'
-import { getDataFilesDir, WriteFilesOpt, writeJson } from '../utils/files.ts'
 import { parseCsv } from './parse-csv.ts'
 import { searchTransactions } from './search-transactions.ts'
 import { AmazonCSVData, TransformedAmazonData } from './types.ts'
@@ -67,8 +66,6 @@ export const amazonToLM = async (
         filters,
         startDate,
         endDate,
-        // writeAllDataToJson,
-        // writeFilesDir: folder,
         filePath,
     })
 
@@ -110,10 +107,6 @@ export const amazonToLM = async (
         `Analyzing ${orders.length} Amazon orders, looking for matches in ${lmTransactions.length} Lunch Money transactions...`,
     )
 
-    // if (writeAllDataToJson) {
-    //     await writeJson(folder, 'lm-transactions.json', lmTransactions)
-    // }
-
     for (const order of orders) {
         i++
 
@@ -143,9 +136,12 @@ export const amazonToLM = async (
                 continue
             }
             try {
-                let notes = `${itemsStr} - ${order.orderUrl.split('&ref')[0]}`
+                // let notes = `${itemsStr} - ${order.orderUrl.split('&ref')[0]}`
+                let notes = `${transaction.notes ? transaction.notes + ' | ' : ''}${order.orderUrl.split('&ref')[0]}`
+                let payee = `${transaction.payee || 'Amazon'} - ${itemsStr}`
                 await lunchMoney.updateTransaction(transaction.id, {
                     notes,
+                    payee,
                     addTags: tags,
                 })
 
@@ -160,41 +156,6 @@ export const amazonToLM = async (
             unmatched.push(order)
         }
     }
-
-    // if (unmatched.length > 0) {
-    //     const fileName = `amazon-orders-no-match.json`
-    //     logger.warn(
-    //         `❗ ${unmatched.length} Amazon orders were not able to be matched with LM transactions. Saving unmatched order data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, unmatched)
-    // }
-
-    // if (extraMatches.length > 0) {
-    //     const fileName = `amazon-orders-extra-matches.json`
-    //     logger.warn(
-    //         `❗ ${extraMatches.length} Amazon orders matched with multiple LM transactions, so we aren't sure which to use. Saving order & transaction data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, extraMatches)
-    // }
-
-    // if (errors.length > 0) {
-    //     const fileName = `amazon-orders-errored-items.json`
-    //     console.warn(
-    //         `❗ Encountered other errors when trying to match ${errors.length} Amazon orders. Saving these items' data to ${folder}/${fileName}`,
-    //     )
-    //     await writeJson(folder, fileName, errors)
-    // }
-
-    // if (successes.length > 0) {
-    //     logger.info(
-    //         `✨ Found matches for ${successes.length} order items and updated Lunch Money transactions.`,
-    //     )
-    //     if (writeAllDataToJson) {
-    //         const fileName = dryRun ? `amazon-orders-dry-run.json` : 'amazon-orders-successful.json'
-    //         logger.info(`Writing successful items data to ${folder}/${fileName}`)
-    //         await writeJson(folder, fileName, successes)
-    //     }
-    // }
 
     return { successes, errors, extraMatches, unmatched, rowsWithIssues }
 }
@@ -263,26 +224,9 @@ async function parseAmazonData({
         })
     })
 
-    // if (missingFieldsData.length > 0) {
-    //     const fileName = 'amazon-data-issues.json'
-    //     logger.warn(
-    //         `⚠️ unable to parse ${missingFieldsData.length} rows. Writing these rows data to ${writeFilesDir}/${fileName}.`,
-    //     )
-    //     await writeJson(writeFilesDir, fileName, missingFieldsData)
-    // }
-
     logger.info(
         `Parsed ${transformedRows.length} Amazon orders successfully out of ${data.length} rows.`,
     )
-    if (transformedRows.length > 0) {
-        // if (writeAllDataToJson) {
-        //     const fileName = 'orders.json'
-        //     logger.info(
-        //         `📝 Writing ${transformedData.length} parsed Amazon orders to ${writeFilesDir}/${fileName}`,
-        //     )
-        //     await writeJson(writeFilesDir, fileName, transformedData)
-        // }
-    }
 
     return { transformedRows, rowsWithIssues }
 }
